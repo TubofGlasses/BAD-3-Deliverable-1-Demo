@@ -4,7 +4,15 @@ from .models import Application
 
 def view_dashboard(request):
     application_objects = Application.objects.all()
-    return render(request, 'base.html', {'applications':application_objects})
+    return render(request, 'dashboard.html', {'applications':application_objects})
+
+def view_home(request):
+    application_objects = Application.objects.all()
+    return render(request, 'home.html', {'applications':application_objects})
+
+def view_progress(request):
+    application_objects = Application.objects.all()
+    return render(request, 'progress_tracker.html', {'applications':application_objects})
 
 def create_application(request):
     if (request.method == "POST"):
