@@ -4,7 +4,7 @@ from .models import Application
 
 def view_dashboard(request):
     application_objects = Application.objects.all()
-    return render(request, 'base.html', {'applications',application_objects})
+    return render(request, 'base.html', {'applications':application_objects})
 
 def create_application(request):
     if (request.method == "POST"):
@@ -21,10 +21,41 @@ def create_application(request):
         expiration_date = None
         if application_type == 'RENEWAL':
             expiration_date = request.POST.get('Expiration_date')
+            if not expiration_date:
+                messages.error(request, 'Expiration date is required.')
+                return redirect('create_application')
 
         if Application.objects.filter(passportNo = passport_no).exists():
             messages.error(request, 'An appllication with this already exists.')
             return redirect('create_application')
+        
+        # if not first_name:
+        #     messages.error(request, 'First name is required.')
+        #     return redirect('create_application')
+        
+        # if not last_name:
+        #     messages.error(request, 'Last name is required.')
+        #     return redirect('create_application')
+        
+        # if not nationality:
+        #     messages.error(request, 'Nationality is required.')
+        #     return redirect('create_application')
+        
+        # if not company_pos:
+        #     messages.error(request, 'Company Position is required.')
+        #     return redirect('create_application')
+        
+        # if not passport_no:
+        #     messages.error(request, 'Name is required.')
+        #     return redirect('create_application')
+        
+        # if not application_type:
+        #     messages.error(request, 'Name is required.')
+        #     return redirect('create_application')
+        
+        # if not document_type:
+        #     messages.error(request, 'Name is required.')
+        #     return redirect('create_application')
         
         new_application = Application(
             firstName = first_name,
