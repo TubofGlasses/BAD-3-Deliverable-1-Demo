@@ -4,27 +4,27 @@ from datetime import timedelta, date
 # Create your models here.
 class Application(models.Model):
     application_types = [
-        ('RENEWAL', 'Renewal'),
-        ('APPLICATION', 'Application')
+        ('Renewal', 'Renewal'),
+        ('Application', 'Application')
     ]
 
     document_types = [
-        ('VISA', 'Visa'),
-        ('PASSPORT', 'Passport'),
-        ('WORK_PERMIT', 'Work Permit')
+        ('Visa', 'Visa'),
+        ('Passport', 'Passport'),
+        ('Work Permit', 'Work Permit')
     ]
 
     statuses = [
-        ('IN_PROGRESS', 'Renewal'),
-        ('LODGED', 'Renewal'),
-        ('REJECTED', 'Renewal'),
-        ('APPROVED', 'Renewal'),
-        ('ARCHIVED', 'Renewal')
+        ('In Progress', 'In Progress'),
+        ('Lodged', 'Lodged'),
+        ('Rejected', 'Rejected'),
+        ('Approved', 'Approved'),
+        ('Archived', 'Archived')
     ]
 
     conditions = [
-        ('ACTIVE', 'Active'),
-        ('ARCHIVED', 'Archived')
+        ('Active', 'Active'),
+        ('Archived', 'Archived')
     ]
 
     firstName = models.CharField(max_length = 50)
@@ -38,7 +38,7 @@ class Application(models.Model):
     applicationType = models.CharField(max_length = 20, choices = application_types)
     documentType = models.CharField(max_length = 20, choices = document_types)
     businessUnit = models.CharField(max_length = 50)
-    condition = models.CharField(max_length = 10, choices = conditions)
+    condition = models.CharField(max_length = 20, choices = conditions)
     comment = models.TextField(blank=True, null=True)
     priority = models.IntegerField(default=0)
 
@@ -85,8 +85,8 @@ class Application(models.Model):
         return self.priority
     
     def calculate_deadline(self):
-        if self.application_types in 'RENEWAL':
-            if self.document_types in ['VISA', 'PASSPORT']:
+        if self.applicationType in 'RENEWAL':
+            if self.documentType in ['VISA', 'PASSPORT']:
                 return self.expirationDate - timedelta(weeks = 12) # 3 months
             elif self.document_types == 'WORK_PERMIT':
                 return self.expirationDate - timedelta(weeks = 16) # 4 months

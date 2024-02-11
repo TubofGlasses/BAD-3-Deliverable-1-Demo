@@ -3,15 +3,15 @@
 
 {% block content %}
 <link rel="shortcut icon" type="image/png" href="{% static 'idslogo.png' %}" >
-<div style="padding-top: 20px; margin-left: 40px; margin-right: 40px;">
+<div style="padding-top: 20px; margin-left: 40px;">
     <div class="card" style="border: none; border-radius: 30px;">
         <div class="card-body">
             <h2 class="card-title mt-3" style="margin-left: 30px; margin-right: 30px; color: #0BB351; font-weight: bold; border-bottom: 3px solid #0BB351;">Dashboard</h2>
         </div>
     </div>
-    <div class="card mt-3" style="border: none; min-height: calc(100vh - 150px); background: #e8f4ec; border-radius: 30px;">
-        {% comment %} Filter buttons {% endcomment %}
-        <div class="row mt-4" style="margin-left: 20px; margin-right: 20px">
+    <div id="dynamicCard" class="card mt-3" style="border: none; background: #e8f4ec; border-radius: 30px;">
+        <!-- Filter Buttons -->
+        <div class="row mt-4" style="margin-left: 20px; margin-right: 20px;">
             <!-- Left buttons -->
             <div class="col-6 d-flex justify-content-start">
                 <a class="btn d-flex align-items-center justify-content-center me-2" style="border-radius: 15px; background: #8D8AFF; color: #ffffff; box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.20);">
@@ -45,6 +45,125 @@
                 </a>
             </div>
         </div>
+
+        <!-- Table -->
+
+        <style>
+            .table thead th:first-child {
+                border-top-left-radius: 14px;
+                border-bottom-left-radius: 14px;
+            }
+        
+            .table thead th:last-child {
+                border-top-right-radius: 14px;
+                border-bottom-right-radius: 14px;
+            }
+
+            .table-row td:first-child {
+                border-top-left-radius: 14px;
+                border-bottom-left-radius: 14px;
+            }
+        
+            .table-row td:last-child {
+                border-top-right-radius: 14px;
+                border-bottom-right-radius: 14px;
+            }
+
+            .table {
+                border-spacing: 0;
+                border-collapse: separate;
+            }
+
+            .status-label {
+                border-radius: 14px;
+                font-weight: bold;
+                padding: 3px 15px;
+            }
+            
+            .status-in-progress {
+                background-color: #FDDD1B;
+                color: #000000;
+            }
+
+            .status-lodged {
+                background-color: #FF8640;
+                color: #ffffff;
+            }
+
+            .status-approved {
+                background-color: #0BB351;
+                color: #ffffff;
+            }
+
+            .status-rejected {
+                background-color: #FF5252;
+                color: #ffffff;
+            }
+        </style>
+
+        <div style="margin-left: 30px; margin-right: 30px;">
+            <table class="table table-hover mt-5 mb-5" style="font-size: 14px;">
+                <thead style="border-radius: 14px;">
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"><input class="form-check-input" type="checkbox" id="selectAll"></th>
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Pass No. </th>
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Employee </th>
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Nationality </th>
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Position </th>
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Company </th>
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Document Type </th>
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Status </th>
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Deadline </th>
+                </thead>
+                <tbody>
+                    {% for a in applications %}
+                    <tr class="table-row">
+                        <!-- Display employee details -->
+                        <td><input type="checkbox" class="row-checkbox form-check-input"></td>
+                        <td><span style="font-weight: bold;">{{ a.getPassportNo }}</span></td>
+                        <td>{{ a.getFirstName }} {{ a.getLastName }}</td>
+                        <td> {{ a.getNationality }} </td>
+                        <td> {{ a.getCompanyPos }} </td>
+                        <td> {{ a.getBusinessUnit }} </td>
+                        <td><span style="border-radius: 14px; background: #FFFADC; font-weight: bold; padding-left: 15px; padding-right: 15px; padding-top: 3px; padding-bottom: 3px;">{{ a.getDocumentType }}</span></td>
+                        <td> 
+                            <span class="status-label
+                                {% if a.getStatus == 'In Progress' %}status-in-progress
+                                {% elif a.getStatus == 'Lodged' %}status-lodged
+                                {% elif a.getStatus == 'Approved' %}status-approved
+                                {% elif a.getStatus == 'Rejected' %}status-rejected
+                                {% endif %}
+                            ">
+                                {{ a.getStatus }}
+                            </span>
+                        </td>
+                        <td> {{ a.getDeadline }} </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+<script>
+    function adjustCardHeight() {
+        var card = document.getElementById('dynamicCard');
+        var rect = card.getBoundingClientRect();
+        var offsetTop = rect.top;
+        var windowHeight = window.innerHeight;
+        var newHeight = windowHeight - offsetTop - 20;
+        card.style.minHeight = newHeight + 'px';
+    }
+
+    window.onload = adjustCardHeight;
+    window.onresize = adjustCardHeight; 
+    
+    document.getElementById('selectAll').addEventListener('change', function(event) {
+        var checkboxes = document.querySelectorAll('.row-checkbox');
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = event.target.checked;
+        }
+    });
+</script>
+
 {% endblock %}
