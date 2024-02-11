@@ -30,7 +30,7 @@
     </head>
     <body>
         <div class="d-flex flex-column flex-shrink-0 p-3 text-black bg-white vh-100 position-fixed" style="width: 280px;">
-            <a href="" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-black text-decoration-none pb-4">
+            <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-black text-decoration-none pb-4">
                 <img src="{% static 'idslogo.png' %}" width="32" height="32" class="me-2" alt="IDS Logo">
                 <span class="fs-4">IDS Tracker</span>
             </a>
@@ -56,7 +56,6 @@
             </ul>
         </div>
         {% block content %}
-        
         {% endblock %}
     </body>
 </html>
