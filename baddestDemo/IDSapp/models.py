@@ -92,7 +92,7 @@ class Application(models.Model):
                 return self.expirationDate - timedelta(weeks = 16) # 4 months
         else:
             today = date.today()
-            return today + timedelta(weeks = 4)
+            return today + timedelta(weeks = 12)
         
     def calculate_priority(self):
         today = date.today()

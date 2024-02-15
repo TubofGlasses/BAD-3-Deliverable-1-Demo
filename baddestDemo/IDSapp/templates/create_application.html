@@ -3,14 +3,48 @@
 
 {% block content %}
 <link rel="shortcut icon" type="image/png" href="{% static 'idslogo.png' %}" >
-<div style="padding-top: 20px; margin-left: 40px; margin-right: 40px;">
+<div style="padding-top: 20px; margin-left: 40px;">
     <div class="card" style="border: none; border-radius: 30px;">
         <div class="card-body">
             <h2 class="card-title mt-3" style="margin-left: 30px; margin-right: 30px; color: #0BB351; font-weight: bold; border-bottom: 3px solid #0BB351;">Create Application</h2>
         </div>
     </div>
-    <div class="card mt-3" style="border: none; min-height: calc(100vh - 150px); background: #e8f4ec; border-radius: 30px;">
-        
+    <div id="dynamicCard" class="card mt-3" style="border: none; background: #e8f4ec; border-radius: 30px;">
+        <!-- application creation form -->
+        <div style="margin-top: 30px; margin-left: 40px; margin-right: 40px;">
+            <!-- column 1 -->
+            <div>
+                <label>First Name and Middle Name</label>
+                <input type="text" class="form-control" style="width: 300px;">
+                <label>Nationality</label>
+                <input type="text" class="form-control" style="width: 300px;">
+                <label>Business Unit</label>
+                <input type="text" class="form-control" style="width: 300px;">
+            </div>
+            <!-- column 2 -->
+            <div>
+                <label>Last Name</label>
+                <input type="text" class="form-control" style="width: 300px;">
+                <label>Company Position</label>
+                <input type="text" class="form-control" style="width: 300px;">
+            </div>
+            <button style="background: #109E4C; color: #ffffff;">Confirm</button>
+        </div>
     </div>
 </div>
+
+<script>
+    function adjustCardHeight() {
+        var card = document.getElementById('dynamicCard');
+        var rect = card.getBoundingClientRect();
+        var offsetTop = rect.top;
+        var windowHeight = window.innerHeight;
+        var newHeight = windowHeight - offsetTop - 20;
+        card.style.minHeight = newHeight + 'px';
+    }
+
+    window.onload = adjustCardHeight;
+    window.onresize = adjustCardHeight; 
+</script>
+
 {% endblock %}
