@@ -143,7 +143,27 @@
             </table>
         </div>
         <div>
-            <!-- page navigation -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if applications.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ applications.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+        
+                    {% for num in applications.paginator.page_range %}
+                        {% if applications.number == num %}
+                            <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif num > applications.number|add:'-3' and num < applications.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+        
+                    {% if applications.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ applications.next_page_number }}">Next</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ applications.paginator.num_pages }}">Last</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
     </div>
 </div>

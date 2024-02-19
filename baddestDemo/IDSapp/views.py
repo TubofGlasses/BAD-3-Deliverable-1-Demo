@@ -1,10 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Application
+from django.core.paginator import Paginator
 
 def view_dashboard(request):
-    application_objects = Application.objects.all()
-    return render(request, 'dashboard.html', {'applications':application_objects})
+    application_list = Application.objects.all()
+    paginator = Paginator(application_list, 10)  # Show 20 applications per page.
+
+    page_number = request.GET.get('page')
+    applications = paginator.get_page(page_number)
+
+    return render(request, 'dashboard.html', {'applications': applications})
 
 def view_home(request):
     application_objects = Application.objects.all()
