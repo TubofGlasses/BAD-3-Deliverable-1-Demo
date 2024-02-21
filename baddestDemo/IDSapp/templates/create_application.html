@@ -11,23 +11,61 @@
     </div>
     <div id="dynamicCard" class="card mt-3" style="border: none; background: #e8f4ec; border-radius: 30px;">
         <!-- application creation form -->
-        <div style="margin-top: 30px; margin-left: 40px; margin-right: 40px;">
-            <!-- column 1 -->
-            <div>
-                <label>First Name and Middle Name</label>
-                <input type="text" class="form-control" style="width: 300px;">
-                <label>Nationality</label>
-                <input type="text" class="form-control" style="width: 300px;">
-                <label>Business Unit</label>
-                <input type="text" class="form-control" style="width: 300px;">
-            </div>
-            <!-- column 2 -->
-            <div>
-                <label>Last Name</label>
-                <input type="text" class="form-control" style="width: 300px;">
-                <label>Company Position</label>
-                <input type="text" class="form-control" style="width: 300px;">
-            </div>
+        <form id="applicationForm" class="card mt-3 p-5" style="border: none; background: #e8f4ec; border-radius: 30px;">
+            <div class="row">
+                <!-- column 1 -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="firstName">First Name and Middle Name</label>
+                        <input type="text" id="firstName" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="nationality">Nationality</label>
+                        <input type="text" id="nationality" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="businessUnit">Business Unit</label>
+                        <input type="text" id="businessUnit" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="businessUnit">Expiration Date</label>
+                        <input type="text" id="expirationDate" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+
+                </div>
+                <!-- column 2 -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Company Position</label>
+                        <input type="text" id="position" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Document Type</label>
+                        <select class="form-control" id="docuType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
+                            <option selected></option>
+                            <option value="Visa">Visa</option>
+                            <option value="Passport">Passport</option>
+                            <option value="Work Permit">Work Permit</option>
+                            
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Application ID</label>
+                        <input type="text" id="AppId" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Application Type</label>
+                        <select class="form-control" id="AppType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
+                            <option selected></option>
+                            <option value="Visa">Renewal</option>
+                            <option value="Passport">Application</option>
+                        </select>
+                    </div>
+                </div>
             <button style="background: #109E4C; color: #ffffff;">Confirm</button>
         </div>
     </div>
