@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Application
 from django.core.paginator import Paginator
+from datetime import datetime
 
 def view_dashboard(request):
-    application_list = Application.objects.all()
+    application_list = Application.objects.all().order_by('priority', 'deadline')
     paginator = Paginator(application_list, 10)  # Show 20 applications per page.
 
     page_number = request.GET.get('page')
@@ -12,9 +13,9 @@ def view_dashboard(request):
 
     return render(request, 'dashboard.html', {'applications': applications})
 
-def view_home(request):
+def view_checklist(request):
     application_objects = Application.objects.all()
-    return render(request, 'home.html', {'applications':application_objects})
+    return render(request, 'checklist.html', {'applications':application_objects})
 
 def view_progress(request):
     application_objects = Application.objects.all()
@@ -22,54 +23,26 @@ def view_progress(request):
 
 def create_application(request):
     if (request.method == "POST"):
-        first_name = request.POST.get('First_name')
-        last_name = request.POST.get('Last_name')
-        nationality = request.POST.get('Nationality')
-        company_pos = request.POST.get('Company_Pos')
-        passport_no = request.POST.get('Passport_no')
-        application_type = request.POST.get('Application_type')
-        document_type = request.POST.get('Document_type')
-        business_unit = request.POST.get('Business_unit')
-        status = 'IN_PROGRESS'
+        first_name = request.POST.get('firstName')
+        last_name = request.POST.get('lastName')
+        nationality = request.POST.get('nationality')
+        company_pos = request.POST.get('position')
+        passport_no = request.POST.get('PassNo')
+        application_type = request.POST.get('AppType')
+        document_type = request.POST.get('docuType')
+        business_unit = request.POST.get('businessUnit')
+        status = 'In Progress'
 
         expiration_date = None
-        if application_type == 'RENEWAL':
-            expiration_date = request.POST.get('Expiration_date')
-            if not expiration_date:
-                messages.error(request, 'Expiration date is required.')
-                return redirect('create_application')
+        if application_type == 'Renewal':
+            expiration_date = request.POST.get('expirationDate')
+            
+        if expiration_date:
+            expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
-        if Application.objects.filter(passportNo = passport_no).exists():
-            messages.error(request, 'An appllication with this already exists.')
+        if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
+            messages.error(request, 'Application with this already exists.')
             return redirect('create_application')
-        
-        # if not first_name:
-        #     messages.error(request, 'First name is required.')
-        #     return redirect('create_application')
-        
-        # if not last_name:
-        #     messages.error(request, 'Last name is required.')
-        #     return redirect('create_application')
-        
-        # if not nationality:
-        #     messages.error(request, 'Nationality is required.')
-        #     return redirect('create_application')
-        
-        # if not company_pos:
-        #     messages.error(request, 'Company Position is required.')
-        #     return redirect('create_application')
-        
-        # if not passport_no:
-        #     messages.error(request, 'Name is required.')
-        #     return redirect('create_application')
-        
-        # if not application_type:
-        #     messages.error(request, 'Name is required.')
-        #     return redirect('create_application')
-        
-        # if not document_type:
-        #     messages.error(request, 'Name is required.')
-        #     return redirect('create_application')
         
         new_application = Application(
             firstName = first_name,
@@ -81,11 +54,18 @@ def create_application(request):
             documentType = document_type,
             businessUnit = business_unit,
             status = status,
-            condition = 'ACTIVE',
+            condition = 'Active',
             expirationDate = expiration_date, 
         )
 
         new_application.save()
         return redirect('view_dashboard')
     
-    return render(request, 'create_application.html')
+    context = {
+        'status_choices': Application.statuses,
+        'conditon_choices': Application.conditions,
+        'document_type_choices': Application.document_types,
+        'application_type_choices': Application.application_types
+    }
+    
+    return render(request, 'create_application.html', context)

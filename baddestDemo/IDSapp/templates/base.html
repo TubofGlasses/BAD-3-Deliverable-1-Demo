@@ -39,12 +39,6 @@
             </a>
             <a href="{% url 'create_application' %}" class="text-decoration-none btn pt-2 pb-2 mb-4" style="background-color: #0BB351; color: #ffffff";>Create new application +</a>
             <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item">
-                    <a href="{% url 'view_home' %}" class="nav-link {% if request.resolver_match.url_name == 'view_home' %}active{% endif %}">
-                    <svg class="bi me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
-                    Home
-                    </a>
-                </li>
                 <li>
                     <a href="{% url 'view_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'view_dashboard' %}active{% endif %}">
                     <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
@@ -55,6 +49,12 @@
                     <a href="{% url 'view_progress' %}" class="nav-link {% if request.resolver_match.url_name == 'view_progress' %}active{% endif %}">
                     <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
                     Progress Tracker
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'view_checklist' %}" class="nav-link {% if request.resolver_match.url_name == 'view_checklist' %}active{% endif %}">
+                    <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
+                    Checklist
                     </a>
                 </li>
             </ul>

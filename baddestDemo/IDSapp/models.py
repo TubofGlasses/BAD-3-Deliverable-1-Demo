@@ -85,14 +85,14 @@ class Application(models.Model):
         return self.priority
     
     def calculate_deadline(self):
-        if self.applicationType in 'RENEWAL':
-            if self.documentType in ['VISA', 'PASSPORT']:
-                return self.expirationDate - timedelta(weeks = 12) # 3 months
-            elif self.document_types == 'WORK_PERMIT':
-                return self.expirationDate - timedelta(weeks = 16) # 4 months
+        if self.applicationType == 'Renewal':
+            if self.documentType in ['Visa', 'Passport']:
+                return self.expirationDate - timedelta(weeks=12)
+            elif self.documentType == 'Work Permit':
+                return self.expirationDate - timedelta(weeks=16)
         else:
             today = date.today()
-            return today + timedelta(weeks = 12)
+            return today + timedelta(weeks=12)
         
     def calculate_priority(self):
         today = date.today()
