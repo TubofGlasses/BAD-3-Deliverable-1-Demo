@@ -11,7 +11,7 @@
     </div>
     <div id="dynamicCard" class="card mt-3" style="border: none; background: #e8f4ec; border-radius: 30px;">
         <!-- application creation form -->
-        <form id="applicationForm" class="card mt-3 p-5" style="border: none; background: #e8f4ec; border-radius: 30px;">
+        <form id="applicationForm" form method="POST" action="{% url 'create_application'%}" class="card mt-3 p-5" style="border: none; background: #e8f4ec; border-radius: 30px;"> {% csrf_token %}
             <div class="row">
                 <!-- column 1 -->
                 <div class="col-md-6">
@@ -28,8 +28,8 @@
                         <input type="text" id="businessUnit" class="form-control" style="border-radius: 10px; background-color: #fff;">
                     </div>
                     <div class="form-group">
-                        <label for="businessUnit">Expiration Date</label>
-                        <input type="text" id="expirationDate" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                        <label for="expirationDate">Expiration Date</label>
+                        <input type="date" id="expirationDate" class="form-control" style="border-radius: 10px; background-color: #fff; cursor: pointer;">
                     </div>
 
                 </div>
@@ -37,28 +37,27 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                        <input type="text" id="lastName" class="form-control" style="border-radius: 10px; background-color: #fff; ">
                     </div>
                     <div class="form-group">
                         <label for="position">Company Position</label>
                         <input type="text" id="position" class="form-control" style="border-radius: 10px; background-color: #fff;">
                     </div>
                     <div class="form-group">
-                        <label for="position">Document Type</label>
+                        <label for="docuType">Document Type</label>
                         <select class="form-control" id="docuType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
                             <option selected></option>
                             <option value="Visa">Visa</option>
                             <option value="Passport">Passport</option>
                             <option value="Work Permit">Work Permit</option>
-                            
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="position">Application ID</label>
+                        <label for="AppId">Application ID</label>
                         <input type="text" id="AppId" class="form-control" style="border-radius: 10px; background-color: #fff;">
                     </div>
                     <div class="form-group">
-                        <label for="position">Application Type</label>
+                        <label for="AppType">Application Type</label>
                         <select class="form-control" id="AppType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
                             <option selected></option>
                             <option value="Visa">Renewal</option>
@@ -66,10 +65,27 @@
                         </select>
                     </div>
                 </div>
-            <button style="background: #109E4C; color: #ffffff;">Confirm</button>
-        </div>
+            <div style="text-align: right;">
+            <button style="background: #109E4C; color: #ffffff; width: 20%; padding: 10px 20px; border-radius: 20px; margin-top: 20px; margin-right: 46px; text-align: center;" class="btn">Confirm</button>
+            </div>
+        </form>
     </div>
 </div>
+
+<style>
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-control, .form-control:focus {
+        width: 90%; 
+        border-radius: 10px;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        padding: .375rem .75rem;
+        margin-bottom: .5rem;
+    }  
+</style>
 
 <script>
     function adjustCardHeight() {
