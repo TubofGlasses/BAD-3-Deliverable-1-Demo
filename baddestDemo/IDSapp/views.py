@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from datetime import datetime
 
 def view_dashboard(request):
-    application_list = Application.objects.all().order_by('priority', 'deadline')
+    application_list = Application.objects.all().order_by('-priority', 'deadline')
     paginator = Paginator(application_list, 10)  # Show 20 applications per page.
 
     page_number = request.GET.get('page')
@@ -17,7 +17,7 @@ def view_checklist(request):
     application_objects = Application.objects.all()
     return render(request, 'checklist.html', {'applications':application_objects})
 
-def view_progress(request):
+def view_profile(request):
     application_objects = Application.objects.all()
     return render(request, 'progress_tracker.html', {'applications':application_objects})
 
