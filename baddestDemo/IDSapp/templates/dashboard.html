@@ -121,7 +121,7 @@
             <table class="table table-hover mt-5 mb-5" style="font-size: 12px;">
                 <thead style="border-radius: 14px;">
                     <th scope="col" style="background-color: #0BB351; color: #ffffff;"><input class="form-check-input" type="checkbox" id="selectAll"></th>
-                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Pass No. </th>
+                    <th scope="col" style="background-color: #0BB351; color: #ffffff;"> App. ID </th>
                     <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Employee </th>
                     <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Nationality </th>
                     <th scope="col" style="background-color: #0BB351; color: #ffffff;"> Position </th>
@@ -135,7 +135,7 @@
                     <tr class="table-row">
                         <!-- Display employee details -->
                         <td><input type="checkbox" class="row-checkbox form-check-input"></td>
-                        <td><span style="font-weight: bold;">{{ a.getPassportNo }}</span></td>
+                        <td><span style="font-weight: bold;">{{ a.pk }}</span></td>
                         <td>{{ a.getFirstName }} {{ a.getLastName }}</td>
                         <td> {{ a.getNationality }} </td>
                         <td> {{ a.getCompanyPos }} </td>
