@@ -3,6 +3,10 @@ from django.contrib import messages
 from .models import Application
 from django.core.paginator import Paginator
 from datetime import datetime
+from django.views.decorators.csrf import csrf_protect
+from django.http import JsonResponse
+import json
+
 
 def view_dashboard(request):
     application_list = Application.objects.all().order_by('-priority', 'deadline')
@@ -55,7 +59,7 @@ def create_application(request):
             businessUnit = business_unit,
             status = status,
             condition = 'Active',
-            expirationDate = expiration_date, 
+            expirationDate = expiration_date,  
         )
 
         new_application.save()
@@ -69,3 +73,11 @@ def create_application(request):
     }
     
     return render(request, 'create_application.html', context)
+
+@csrf_protect
+def delete_selected(request):
+    # This view will now enforce CSRF protection
+    data = json.loads(request.body)
+    ids_to_delete = data.get('ids', [])
+    Application.objects.filter(pk__in=ids_to_delete).delete()
+    return JsonResponse({'status': 'success'}, status=200)
