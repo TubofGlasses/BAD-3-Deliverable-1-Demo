@@ -23,7 +23,7 @@ def view_checklist(request):
 
 def view_profile(request):
     application_objects = Application.objects.all()
-    return render(request, 'progress_tracker.html', {'applications':application_objects})
+    return render(request, 'user_profile.html', {'applications':application_objects})
 
 def create_application(request):
     if (request.method == "POST"):
