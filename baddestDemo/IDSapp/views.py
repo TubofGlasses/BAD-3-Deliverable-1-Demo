@@ -85,3 +85,6 @@ def delete_selected(request):
 def view_application(request): #add pk here 
     application_objects = Application.objects.all()
     return render(request, 'view_application.html')
+
+def login(request):
+    return render(request, 'login.html')

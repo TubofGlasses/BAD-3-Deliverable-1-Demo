@@ -6,11 +6,25 @@
     <div class="card" style="border: none; border-bottom-left-radius: 30px; border-top-left-radius: 30px;">
         <div class="card-body">
             <h2 class="card-title mt-3" style="margin-left: 30px; margin-right: 30px; color: #0BB351; font-weight: bold; border-bottom: 3px solid #0BB351;">View Application</h2>
+            <a href="{% url 'view_dashboard' %}" class="close-icon">&times;</a>
         </div>
     </div>
 </div>
 
 <style>
+    .close-icon {
+        position: absolute;
+        top: 15px;
+        right: 30px;
+        font-size: 40px;
+        text-decoration: none;
+        color: #0e9e4c; /* Change as needed */
+      }
+      
+      .close-icon:hover {
+        color: #555; 
+      }
+
     .personal-information {
         flex-direction: column; /* Stack children vertically */
         justify-content: center; /* Center children vertically (if needed) */
@@ -55,12 +69,6 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
 
-      .status-condition{
-
-
-      }
-
-     
       
       .info-block {
         background-color: #f5f5f5; /* Card background color */
@@ -84,7 +92,7 @@
         justify-content: space-between;
         margin-bottom: 25px;
         align-items: center;
-        background: #f7f7f7;
+        background: white;
         padding: 10px;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -116,6 +124,11 @@
         padding: 10px;
         margin-bottom: 10px;
         height: 100px; /* You can adjust the height as needed */
+        border-radius: 10px;
+      }
+      .form-section .button-container {
+        display: flex;
+        justify-content: flex-end; /* Aligns the button to the right */
       }
       
       .form-section button {
@@ -125,8 +138,32 @@
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        justify-content: right;
+
       }
       
+      .tabs {
+        display: flex;
+        justify-content: space-evenly; /* This will space your tabs evenly */
+        margin-bottom: 20px; /* Adds space below the tabs */
+      }
+      
+      .tab {
+        display: block;
+        padding: 10px 20px;
+        color: black; /* Tab text color */
+        text-decoration: none; /* Removes underline from links */
+        border-bottom: 3px solid transparent; /* Transparent border for unselected tabs */
+        font-size: 18px;
+      }
+      
+      .tab.active {
+        border-bottom: 3px solid #0BB351; /* Green border for the active tab */
+        font-weight: bold;
+        font-size: 17px;
+        color: #0BB351; 
+      }
+
   </style>
 
 <div class="container">
@@ -172,23 +209,29 @@
                 <span>{{pk.}}</span>
             </div>
 
-                <div class="info-row">
-                    <label>Expiration Date</label>
-                    <span>{{pk.getExpirationDate}}</span>
-                </div>
+            <div class="info-row">
+                <label>Expiration Date</label>
+                <span>{{pk.getExpirationDate}}</span>
+            </div>
 
-                <div class="info-row">
-                    <label>Deadline</label>
-                    <span>{{pk.getDeadline}}</span>
-                </div>
+            <div class="info-row">
+                <label>Deadline</label>
+                <span>{{pk.getDeadline}}</span>
+            </div>
             
         </div>
 
 
         <div class="form-section" style="flex: 1; padding-left: 10px;">
-          <h3>Additional Details</h3>
+            <div class='tabs'>
+                <a href="#" class="tab active">Additional Details</a>
+                <a href="#" class="tab">History</a>
+                <a href="#" class="tab">Checklist</a>
+            </div>
           <textarea placeholder="Add details"></textarea>
-          <button>Submit</button>
+          <div class="button-container">
+            <button>Submit</button>
+          </div>
         </div>
       </div>
     </div>
@@ -198,6 +241,4 @@
 
 <!--TO DO
 - add pks so that it is specific to the application you clicked on 
-- add x button so that it will lead you back to the dashboard page
-- add a card behind the infoblock section
 -->
