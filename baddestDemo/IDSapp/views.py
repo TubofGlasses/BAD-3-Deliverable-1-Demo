@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Application, Account
 from django.core.paginator import Paginator
@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
 import re
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import make_password
 
 
@@ -84,12 +85,25 @@ def delete_selected(request):
     Application.objects.filter(pk__in=ids_to_delete).delete()
     return JsonResponse({'status': 'success'}, status=200)
 
-def view_application(request): #add pk here 
-    application_objects = Application.objects.all()
-    return render(request, 'view_application.html')
+def view_application(request,pk): #add pk here 
+    a = get_object_or_404(Application, pk=pk)
+    return render(request, 'view_application.html',{'a':a})
 
 def login(request):
-    return render(request, 'login.html')
+    if (request.method == "POST"):
+        username = request.POST.get('username')
+        password = make_password(request.POST.get('password'))
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect( 'view_dashboard')
+        else:
+            context = {'error': 'Invalid username or password'}
+            return render(request, 'login.html', context)
+    
+    else:
+        return render(request, 'login.html')
 
 def create_account(request): #this still needs password encryption
     if (request.method == "POST"):
