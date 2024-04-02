@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="shortcut icon" type="image/png" href="{% static 'idslogo.png' %}" >
+<div style="padding-top: 20px; margin-left: 40px;">
+    <div class="card" style="border: none; border-bottom-left-radius: 30px; border-top-left-radius: 30px;">
+        <div class="card-body">
+            <h2 class="card-title mt-3" style="margin-left: 30px; margin-right: 30px; color: #0BB351; font-weight: bold; border-bottom: 3px solid #0BB351;">Create Application</h2>
+        </div>
+    </div>
+    <div id="dynamicCard" class="card mt-3" style="border: none; background: #e8f4ec; border-radius: 30px;">
+        <!-- application creation form -->
+        <form id="applicationForm" form method="POST" action="{% url 'create_application'%}" class="card mt-3 p-5" style="border: none; background: #e8f4ec; border-radius: 30px;"> {% csrf_token %}
+            <div class="row">
+                <!-- column 1 -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="firstName">First Name and Middle Name<span class="required-asterisk">*</span></label>
+                        <input type="text" id="firstName" name="firstName" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="nationality">Nationality<span class="required-asterisk">*</span></label>
+                        <input type="text" id="nationality" name="nationality" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="businessUnit">Business Unit<span class="required-asterisk">*</span></label>
+                        <input type="text" id="businessUnit" name="businessUnit" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="expirationDate">Expiration Date<span class="required-asterisk">*</span></label>
+                        <input type="date" id="expirationDate" name="expirationDate" class="form-control" style="border-radius: 10px; background-color: #fff; cursor: pointer;">
+                    </div>
+
+                </div>
+                <!-- column 2 -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="lastName">Last Name<span class="required-asterisk">*</span></label>
+                        <input type="text" id="lastName" name="lastName" class="form-control" style="border-radius: 10px; background-color: #fff; ">
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Company Position<span class="required-asterisk">*</span></label>
+                        <input type="text" id="position" name="position" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                    </div>
+                    <div class="form-group">
+                        <label for="docuType">Document Type<span class="required-asterisk">*</span></label>
+                        <select class="form-control" id="docuType" name="docuType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
+                            <option value="">Choose...</option>
+                            {% for value, display_text in document_type_choices %}
+                                <option value="{{ value }}">{{ display_text }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="AppType">Application Type</label>
+                        <select class="form-control" id="AppType" name="AppType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
+                            {% for value, display_text in application_type_choices %}
+                                <option value="{{ value }}">{{ display_text }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="PassNo">Passport No.<span class="required-asterisk">*</span></label>
+                        <input type="text" id="PassNo" name="PassNo" class="form-control {% if messages %}highlight-error{% endif %}" 
+                            style="border-radius: 10px; background-color: #fff;" 
+                            {% for message in messages %}
+                                {% if message.tags == 'error' %}placeholder="{{ message }}"{% endif %}
+                            {% endfor %}
+                        >
+                    </div>
+                </div>
+            <div style="text-align: right;">
+            <button style="background: #109E4C; color: #ffffff; width: 20%; padding: 10px 20px; border-radius: 10px; margin-top: 20px; margin-right: 46px; text-align: center;" class="btn">Confirm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .highlight-error::placeholder {
+        color: red;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-control, .form-control:focus {
+        width: 90%; 
+        border-radius: 10px;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        padding: .375rem .75rem;
+        margin-bottom: .5rem;
+    }
+
+    .highlight-error {
+        border: 1px solid var(--bs-danger-border-subtle) !important;
+    }
+
+    .required-asterisk {
+        color: red;
+        margin-left: 5px;
+    }
+</style>
+
+<script>
+    // Function to adjust card height
+    function adjustCardHeight() {
+        var card = document.getElementById('dynamicCard');
+        var rect = card.getBoundingClientRect();
+        var offsetTop = rect.top;
+        var windowHeight = window.innerHeight;
+        var newHeight = windowHeight - offsetTop - 20;
+        card.style.minHeight = newHeight + 'px';
+    }
+
+    // Event listener for form submission
+    document.getElementById('applicationForm').addEventListener('submit', function(event) {
+        var requiredFields = ['firstName', 'lastName', 'nationality', 'position', 'PassNo', 'docuType', 'businessUnit', 'expirationDate'];
+        var isFormValid = true;
+    
+        requiredFields.forEach(function(fieldId) {
+            var inputElement = document.getElementById(fieldId);
+            var asteriskElement = inputElement.previousElementSibling.querySelector('.required-asterisk');
+    
+            var isInvalid = inputElement.value.trim() === '' || inputElement.value === 'Choose...';
+            var isExpirationDateField = fieldId === 'expirationDate';
+            var isNotRenewal = document.getElementById('AppType').value !== 'Renewal';
+    
+            if (isInvalid && !(isExpirationDateField && isNotRenewal)) {
+                inputElement.classList.add('highlight-error');
+                asteriskElement.style.display = 'inline';
+                isFormValid = false;
+            } else {
+                inputElement.classList.remove('highlight-error');
+                asteriskElement.style.display = 'none';
+            }
+        });
+    
+        if (!isFormValid) {
+            event.preventDefault();
+        }
+    });
+
+    // Call adjustCardHeight on window load and resize
+    window.onload = adjustCardHeight;
+    window.onresize = adjustCardHeight; 
+</script>
+
+{% endblock %}

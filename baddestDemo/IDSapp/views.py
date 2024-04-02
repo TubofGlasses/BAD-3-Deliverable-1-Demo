@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Application
+from .models import Application, Account
 from django.core.paginator import Paginator
 from datetime import datetime
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
+import re
 
 
 def view_dashboard(request):
@@ -88,3 +89,48 @@ def view_application(request): #add pk here
 
 def login(request):
     return render(request, 'login.html')
+
+def create_account(request): #this still needs password encryption
+    if (request.method == "POST"):
+        admin_pass = request.POST.get('adminpass')
+        user = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_pass = request.POST.get('Cpassword')
+        reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
+        pat = re.compile(reg)
+        mat = re.search(pat, password)
+
+        if Account.objects.filter(email=email).exists():
+            messages.error(request, 'There is already an account associated with this email.')
+            return redirect('create_account')
+        
+        if Account.objects.filter(username=user).exists():
+            messages.error(request, 'Username is already taken.')
+            return redirect('create_account')
+        
+        if not mat:
+            messages.error(request, 'Invalid Password')
+
+        if password != confirm_pass:
+            messages.error(request, 'Passwords do not match.')
+            return redirect('create_account')
+
+        if admin_pass != admin_pass: #placeholder for wherever I will get admin password from
+            messages.error(request, 'Admin password provided is incorrect.')
+            return redirect('create_account')
+
+        new_account = Account(
+            username = user,
+            email = email,
+            password = password,
+        )
+
+        new_account.save()
+        return redirect('login')
+    
+    return render(request, 'create_account.html')
+
+def delete_account(request, pk): #this will likely need csrf protection
+    Account.objects.filter(pk=pk).delete()
+    return redirect('login') #change this later to incorporate the delete message

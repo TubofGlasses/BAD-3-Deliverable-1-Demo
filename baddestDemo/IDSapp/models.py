@@ -115,4 +115,17 @@ class Application(models.Model):
 
         super(Application, self).save(*args, **kwargs)
 
+class Account(models.Model):
+    username = models.CharField(max_length = 255)
+    password = models.CharField(max_length = 255)
+    email = models.EmailField(max_length = 254)
+    objects = models.Manager()
 
+    def getUsername(self):
+        return self.username
+    
+    def getPassword(self):
+        return self.password
+    
+    def getEmail(self):
+        return self.email
