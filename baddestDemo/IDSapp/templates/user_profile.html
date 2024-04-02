@@ -24,13 +24,29 @@
         cursor: pointer;
     }
 
+    #passwordButton {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+    }
+
     #emailButton img {
-        transition: all 0.3s ease; /* Smooth transition for the image swap */
+        transition: all 0.3s ease;
     }
 
     #emailButton:hover img,
     #emailButton:focus img {
-        content: url('{% static "edit_selected.png" %}'); /* Swap image on hover or focus */
+        content: url('{% static "edit_selected.png" %}');
+    }
+
+    #passwordButton img {
+        transition: all 0.3s ease;
+    }
+
+    #passwordButton:hover img,
+    #passwordButton:focus img {
+        content: url('{% static "edit_selected.png" %}');
     }
 </style>
 
@@ -64,12 +80,13 @@
     
                 <!-- Email Input -->
                 <div id="emailInputRow" class="row" style="display: none;">
-                    <input type="email" class="form-control mt-4" id="emailInput" placeholder="Enter new email address" style="margin-left: 10px; width: 400px">
+                    <input type="email" class="form-control mt-4" id="emailInput" placeholder="Enter new email address" style="margin-left: 12px; margin-bottom: 30px; width: 400px">
                 </div>
 
                 <hr>
 
-                <div class="row align-items-center">
+                <!--Password Section -->
+                <div class="row align-items-center" id="passwordRow" style="margin-bottom: 30px;">
                     <div class="col-auto">
                         <h5 class="mt-3" style="font-weight: bold;">Change Password</h5>
                     </div>
@@ -79,22 +96,27 @@
                         </button>
                     </div>
                 </div>
-                <div id="passwordInputRow" class="row">
+                <div id="passwordInputRow" class="row" style="display: none;">
                     <div class="col-auto">
-                        <input type="password" class="form-control mt-2" id="passwordInput" placeholder="Password" style="margin-left: 10px; width: 300px">
+                        <input type="password" class="form-control mt-4" id="currentPasswordInput" placeholder="Current Password" style="margin-bottom: 30px; width: 300px">
                     </div>
                     <div class="col-auto">
-                        <input type="password" class="form-control mt-2" id="passwordInput" placeholder="New Password" style="margin-left: 10px; width: 300px">
+                        <input type="password" class="form-control mt-4" id="newPasswordInput" placeholder="New Password" style="margin-bottom: 30px; width: 300px">
                     </div>
                     <div class="col-auto">
-                        <input type="password" class="form-control mt-2" id="passwordInput" placeholder="Confirm Password" style="margin-left: 10px; width: 300px">
+                        <input type="password" class="form-control mt-4" id="confirmPasswordInput" placeholder="Confirm New Password" style="margin-bottom: 30px; width: 300px">
                     </div>
                 </div>
 
                 <hr>
 
-                <div class="row">
+                <!-- Delete Account Section -->
+                <div class="row align-items-center">
                     <h5 class="mt-3" style="font-weight: bold;">Delete Account</h5>
+                </div>
+                <div>
+                    <p class="mt-4">Deletion is <span style="color: #FF5252; text-decoration: underline #FF5252;">permanent and irreversible</span>. This removes all access to all connected services and deletes all spaces and user data. You cannot undo this action.</p>
+                    <button class="btn mt-3" style="display: inline-flex; padding: 7px 39px; align-items: flex-start; gap: 10px; border-radius: 15px; background: #FF5252; color: #FFF;"> Delete account </button>
                 </div>
             </div>
         </div>
@@ -106,12 +128,31 @@
         var emailButton = document.getElementById('emailButton');
         var emailDisplayRow = document.getElementById('emailDisplayRow');
         var emailInputRow = document.getElementById('emailInputRow');
-
+    
         emailButton.addEventListener('click', function() {
-            // Hide the display row and show the input row
-            emailDisplayRow.style.display = 'none';
-            emailInputRow.style.display = 'block';
+            if (emailDisplayRow.style.display != 'none' && emailInputRow.style.display === 'none') {
+                emailDisplayRow.style.display = 'none';
+                emailInputRow.style.display = 'flex';
+            } else {
+                emailDisplayRow.style.display = 'flex';
+                emailInputRow.style.display = 'none';
+            }
+        });
+        
+        var passwordRow = document.getElementById('passwordRow');
+        var passwordButton = document.getElementById('passwordButton');
+        var passwordInputRow = document.getElementById('passwordInputRow');
+    
+        passwordButton.addEventListener('click', function() {
+            
+            if (passwordInputRow.style.display === 'none' && passwordRow.style.marginBottom === '30px') {
+                passwordRow.style.marginBottom = '0px';
+                passwordInputRow.style.display = 'flex'; // Use 'flex' to maintain the row structure
+            } else {
+                passwordRow.style.marginBottom = '30px';
+                passwordInputRow.style.display = 'none';
+            }
         });
     });
-</script>
+    </script>
 {% endblock %}
