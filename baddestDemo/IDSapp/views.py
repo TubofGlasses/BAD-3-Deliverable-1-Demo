@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
 import re
+from django.contrib.auth.hashers import make_password
 
 
 def view_dashboard(request):
@@ -95,8 +96,8 @@ def create_account(request): #this still needs password encryption
         admin_pass = request.POST.get('adminpass')
         user = request.POST.get('username')
         email = request.POST.get('email')
-        password = request.POST.get('password')
-        confirm_pass = request.POST.get('Cpassword')
+        password = make_password(request.POST.get('password'))
+        confirm_pass = make_password(request.POST.get('Cpassword'))
         reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
         pat = re.compile(reg)
         mat = re.search(pat, password)
