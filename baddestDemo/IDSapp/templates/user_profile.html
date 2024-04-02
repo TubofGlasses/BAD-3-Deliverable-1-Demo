@@ -2,11 +2,116 @@
 {% load static %}
 
 {% block content %}
-<div style="padding-top: 20px; margin-left: 40px;">
+<style>
+    .flex-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        margin-left: 40px;
+        padding-top: 20px;
+    }
+
+    .flex-grow {
+        flex-grow: 1;
+        border: none;
+        border-top-left-radius: 30px;
+    }
+
+    #emailButton {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+    }
+
+    #emailButton img {
+        transition: all 0.3s ease; /* Smooth transition for the image swap */
+    }
+
+    #emailButton:hover img,
+    #emailButton:focus img {
+        content: url('{% static "edit_selected.png" %}'); /* Swap image on hover or focus */
+    }
+</style>
+
+<!-- Apply the flex-container class here -->
+<div class="flex-container">
     <div class="card" style="border: none; border-bottom-left-radius: 30px; border-top-left-radius: 30px;">
         <div class="card-body">
-            <h2 class="card-title mt-3" style="margin-left: 30px; margin-right: 30px; color: #0BB351; font-weight: bold; border-bottom: 3px solid #0BB351;">Create Application</h2>
+            <h2 class="card-title mt-3" style="margin-left: 30px; margin-right: 30px; color: #0BB351; font-weight: bold; border-bottom: 3px solid #0BB351;">User Profile</h2>
+        </div>
+    </div>
+    <!-- This is your dynamic card that should stretch to the bottom -->
+    <div id="dynamicCard" class="card mt-4 flex-grow">
+        <div class="container-fluid">
+            <div style="margin-left: 30px; margin-right: 30px;">
+
+                <!--Email Address Section -->
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <h5 class="mt-4 email-text" style="font-weight: bold;">Email Address</h5>
+                    </div>
+                    <div class="col-auto" style="padding-top: 10px">
+                        <button id="emailButton">
+                            <img src="{% static 'edit.png' %}" width="20" height="20" alt="Edit">
+                        </button>
+                    </div>
+                </div>
+
+                <div id="emailDisplayRow" class="row">
+                    <p class="mt-4">Your email address is placeholder@outlook.com</p>
+                </div>
+    
+                <!-- Email Input -->
+                <div id="emailInputRow" class="row" style="display: none;">
+                    <input type="email" class="form-control mt-4" id="emailInput" placeholder="Enter new email address" style="margin-left: 10px; width: 400px">
+                </div>
+
+                <hr>
+
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <h5 class="mt-3" style="font-weight: bold;">Change Password</h5>
+                    </div>
+                    <div class="col-auto" style="padding-top: 5px">
+                        <button id="passwordButton">
+                            <img src="{% static 'edit.png' %}" width="20" height="20" alt="Edit">
+                        </button>
+                    </div>
+                </div>
+                <div id="passwordInputRow" class="row">
+                    <div class="col-auto">
+                        <input type="password" class="form-control mt-2" id="passwordInput" placeholder="Password" style="margin-left: 10px; width: 300px">
+                    </div>
+                    <div class="col-auto">
+                        <input type="password" class="form-control mt-2" id="passwordInput" placeholder="New Password" style="margin-left: 10px; width: 300px">
+                    </div>
+                    <div class="col-auto">
+                        <input type="password" class="form-control mt-2" id="passwordInput" placeholder="Confirm Password" style="margin-left: 10px; width: 300px">
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <h5 class="mt-3" style="font-weight: bold;">Delete Account</h5>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var emailButton = document.getElementById('emailButton');
+        var emailDisplayRow = document.getElementById('emailDisplayRow');
+        var emailInputRow = document.getElementById('emailInputRow');
+
+        emailButton.addEventListener('click', function() {
+            // Hide the display row and show the input row
+            emailDisplayRow.style.display = 'none';
+            emailInputRow.style.display = 'block';
+        });
+    });
+</script>
 {% endblock %}
