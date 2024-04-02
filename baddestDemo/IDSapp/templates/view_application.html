@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="padding-top: 20px; margin-left: 40px;">
+    <div class="card" style="border: none; border-bottom-left-radius: 30px; border-top-left-radius: 30px;">
+        <div class="card-body">
+            <h2 class="card-title mt-3" style="margin-left: 30px; margin-right: 30px; color: #0BB351; font-weight: bold; border-bottom: 3px solid #0BB351;">View Application</h2>
+        </div>
+    </div>
+</div>
+
+<style>
+    .personal-information {
+        flex-direction: column; /* Stack children vertically */
+        justify-content: center; /* Center children vertically (if needed) */
+        margin: 0 auto; /* Auto margins on the sides to center the div on the page */
+        padding: 20px;
+    } 
+    
+      
+      .personal-information h3 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px; /* Spacing below the heading */
+        text-align: center; /* Center the text inside the h3 element */
+        justify-content: center; /* Center children vertically (if needed) */
+      }
+      
+      
+      .status-row, .info-row {
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+      }
+
+      .status-indicator {
+        background-color: #ffcc00; 
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .status-type{
+        background-color: #ffcc00; 
+        color: black;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        margin-bottom: 25px;
+        margin-right: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .status-condition{
+
+
+      }
+
+     
+      
+      .info-block {
+        background-color: #f5f5f5; /* Card background color */
+        padding: 20px; /* Space inside the card */
+        margin-bottom: 20px; /* Space outside the card */
+        border-radius: 16px; /* Adjust as needed for rounded corners */
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* Card shadow for 3D effect */
+        justify-content: center;
+        text-align: center; /* Center the text inside the h3 element */
+        margin: 20px 0; 
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 25px;
+        align-items: center;
+        background: #f7f7f7;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .info-row label {
+        font-weight: bold;
+        color: black;
+      }
+      
+      .info-row span {
+        color: #333;
+        text-align: right;
+      }
+      
+      .form-section {
+        background-color: #e2f4e9;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-top: 20px;
+      }
+      
+      .form-section h3 {
+        margin-top: 0;
+      }
+      
+      .form-section textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        height: 100px; /* You can adjust the height as needed */
+      }
+      
+      .form-section button {
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      
+  </style>
+
+<div class="container">
+    <div class="content">
+      <div class="main" style="display: flex;">
+        <div class="info-block" style="flex: 1; padding-right: 10px;">
+            <h3 class='personal-information'>Personal Information</h3>
+            <div class="status-row">
+                <span class='status-condition'>Active application {{pk.getCondition}}</span>
+            </div>
+            <div class="status-row">
+                <span class="status-type"> Visa {{pk.getDocumentType}}</span>
+                <span class="status-indicator">In progress</span>
+            </div>
+            
+            <div class="info-row">
+                <label>Name</label>
+                <span>Juan Ymir Santos</span> <!--{{getFirstName}}-->
+            </div>
+
+            <div class="info-row">
+                <label>Application ID</label>
+                <span>{{pk.get}}</span>
+            </div>
+
+            <div class="info-row">
+                <label>Passport No.</label>
+                <span>{{pk.getPassportNo}}</span>
+            </div>
+
+            <div class="info-row">
+                <label>Nationality</label>
+                <span>{{pk.getNationality}}</span>
+            </div>
+
+            <div class="info-row">
+                <label>Business Unit</label>
+                <span>{{pk.getBusinessUnit}}</span>
+            </div>
+
+            <div class="info-row">
+                <label>Position</label>
+                <span>{{pk.}}</span>
+            </div>
+
+                <div class="info-row">
+                    <label>Expiration Date</label>
+                    <span>{{pk.getExpirationDate}}</span>
+                </div>
+
+                <div class="info-row">
+                    <label>Deadline</label>
+                    <span>{{pk.getDeadline}}</span>
+                </div>
+            
+        </div>
+
+
+        <div class="form-section" style="flex: 1; padding-left: 10px;">
+          <h3>Additional Details</h3>
+          <textarea placeholder="Add details"></textarea>
+          <button>Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+<!--TO DO
+- add pks so that it is specific to the application you clicked on 
+- add x button so that it will lead you back to the dashboard page
+- add a card behind the infoblock section
+-->

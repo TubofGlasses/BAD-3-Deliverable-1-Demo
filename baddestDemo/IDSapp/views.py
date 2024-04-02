@@ -81,3 +81,7 @@ def delete_selected(request):
     ids_to_delete = data.get('ids', [])
     Application.objects.filter(pk__in=ids_to_delete).delete()
     return JsonResponse({'status': 'success'}, status=200)
+
+def view_application(request): #add pk here 
+    application_objects = Application.objects.all()
+    return render(request, 'view_application.html')
