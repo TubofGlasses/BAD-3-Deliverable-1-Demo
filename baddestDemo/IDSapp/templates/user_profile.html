@@ -206,7 +206,7 @@
         </div>
     </div>
     <div id="dynamicCard" class="card mt-4 flex-grow">
-        <form method="post" action="{% url 'edit_account' request.user.pk %}">
+        <form method="post" action="{% url 'edit_account'%}">
             {% csrf_token %}
             <div class="container-fluid">
                 <div style="margin-left: 30px; margin-right: 30px;">
@@ -321,63 +321,55 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var unsavedChangesAlert = document.getElementById('unsavedChangesAlert');
-        var resetChangesButton = document.getElementById('resetChanges');
-        var saveChangesButton = document.getElementById('saveChanges');
-        var editButtons = document.querySelectorAll('.edit-button');
-        var editStates = {}; // Object to keep track of each button's state
-
-        editButtons.forEach(function(button, index) {
-            // Initialize all edit buttons' state as closed
-            editStates[index] = false;
-
-            button.addEventListener('click', function() {
-                // Toggle state
-                editStates[index] = !editStates[index];
-
-                // Check if any edit button is still open
-                var anyOpen = Object.values(editStates).some(state => state === true);
-
-                if (anyOpen) {
-                    // If any edit button is open, show the alert
-                    if (!unsavedChangesAlert.classList.contains('show-alert')) {
-                        unsavedChangesAlert.classList.add('show-alert');
-                        unsavedChangesAlert.classList.remove('hide-alert');
-                        unsavedChangesAlert.style.display = 'block';
-                    }
-                } else {
-                    // If all edit buttons are closed, hide the alert
-                    if (!unsavedChangesAlert.classList.contains('hide-alert')) {
-                        unsavedChangesAlert.classList.add('hide-alert');
-                        setTimeout(function() {
-                            unsavedChangesAlert.classList.remove('show-alert', 'hide-alert');
-                            unsavedChangesAlert.style.display = 'none';
-                        }, 500); // Wait for animation to finish
-                    }
-                }
-            });
-        });
-
-        var inputs = document.querySelectorAll('.form-control');
-        inputs.forEach(function(input) {
-            input.addEventListener('change', function() {
+        var emailButton = document.getElementById('emailButton');
+        var passwordButton = document.getElementById('passwordButton');
+    
+        var emailSectionOpen = false;
+        var passwordSectionOpen = false;
+    
+        // Function to check if both sections are closed
+        function areBothSectionsClosed() {
+            return !emailSectionOpen && !passwordSectionOpen;
+        }
+    
+        // Function to toggle the alert
+        function toggleAlert() {
+            if (areBothSectionsClosed()) {
+                unsavedChangesAlert.classList.add('hide-alert');
+                setTimeout(function() {
+                    unsavedChangesAlert.classList.remove('show-alert', 'hide-alert');
+                    unsavedChangesAlert.style.display = 'none';
+                }, 500);
+            } else {
                 unsavedChangesAlert.classList.add('show-alert');
+                unsavedChangesAlert.classList.remove('hide-alert');
                 unsavedChangesAlert.style.display = 'block';
-            });
+            }
+        }
+    
+        // Event listener for the email edit button
+        emailButton.addEventListener('click', function(event) {
+            event.stopPropagation();
+            emailSectionOpen = !emailSectionOpen;
+            toggleAlert();
         });
-        resetChangesButton.addEventListener('click', function() {
-            // Close all edit sections and reset their state
-            editButtons.forEach((button, index) => {
-                editStates[index] = false;
-            });
-            // Hide the alert with animation
-            unsavedChangesAlert.classList.add('hide-alert');
-            setTimeout(function() {
-                unsavedChangesAlert.classList.remove('show-alert', 'hide-alert');
-                unsavedChangesAlert.style.display = 'none';
-            }, 500); // Wait for animation to finish
-            window.location.reload();
+    
+        // Event listener for the password edit button
+        passwordButton.addEventListener('click', function(event) {
+            event.stopPropagation();
+            passwordSectionOpen = !passwordSectionOpen;
+            toggleAlert();
         });
-
+    
+        var form = document.querySelector('form');
+        form.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+    
+        document.addEventListener('click', function() {
+        }, true);
+    });
+    document.addEventListener('DOMContentLoaded', function() {
     //buttons
         var emailButton = document.getElementById('emailButton');
         var emailButtonImage = emailButton.querySelector('img');
