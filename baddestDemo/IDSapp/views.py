@@ -8,7 +8,7 @@ from django.http import JsonResponse
 import json
 import re
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 
 
 def view_dashboard(request):
@@ -87,27 +87,31 @@ def delete_selected(request):
 
 def view_application(request,pk): #add pk here 
     a = get_object_or_404(Application, pk=pk)
+    
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        a.status = status
+        a.save()
+        return redirect('view_dashboard')
     return render(request, 'view_application.html',{'a':a})
+
+
 
 def login(request):
     if (request.method == "POST"):
         username = request.POST.get('username')
-        password = request.POST.get('password')
-        account = get_object_or_404(Account, username=username)
-        accountpass = account.getPassword()
+        raw_password = request.POST.get('password')
 
         try:
-            if password== accountpass:
-                # Password is correct, manually set the user ID in the session
-                
-                return redirect('view_dashboard')  # Redirect to a success page.
+            account = Account.objects.get(username=username)
+            if check_password(raw_password, account.password):
+                return redirect('view_dashboard')
             else:
-                # Password is incorrect
-                return render(request, 'login.html', {'error': 'Invalid username or password'})
+                messages.error(request, 'Invalid username or password')
         except Account.DoesNotExist:
-            # No user found with the given username
-            return render(request, 'login.html', {'error': 'Invalid username or password'})
-    
+            messages.error(request, 'Invalid username or password')
+
+        return redirect('login')
     else:
         return render(request, 'login.html')
 

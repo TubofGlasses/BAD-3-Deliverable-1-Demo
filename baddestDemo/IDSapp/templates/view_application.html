@@ -78,27 +78,77 @@
         text-align: center;
         display: inline-block;
         position: relative; 
-        padding-left: 25px;
+        
     }
 
     .status-in-progress {
-        background-color: #ff8640; 
+        background-color: #fddd19;
+        color: Black;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: inline-block;
+        position: relative; 
+        
     }
     
     .status-lodged {
-        background-color:#fddd19; 
+        background-color:#ff8640;
+        color: Black;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: inline-block;
+        position: relative; 
+        
     }
     
     .status-approved {
-        background-color:#0ab351; 
+        background-color:#0ab351;
+        color: Black;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: inline-block;
+        position: relative; 
+        
     }
     
     .status-rejected {
         background-color:#ff5252;
+        color: Black;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: inline-block;
+        position: relative; 
+        
     }
 
     .status-expired{
         background-color:#6c6868;
+        color: Black;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: inline-block;
+        position: relative; 
+        
     }
 
     .docu-type{
@@ -208,6 +258,38 @@
         color: #0BB351; 
     }
 
+    .header {
+        text-align: center; 
+    }
+    .header h2 {
+        display: inline-block; 
+        margin: 0 auto; 
+        font-size: 24px;
+        color: #333;
+    }
+    requirement-list {
+        padding: 0; /* Adjust padding as necessary */
+        margin-left: 40px; /* Adjust margin as necessary */
+    }
+    
+    .requirement-item {
+        padding-left: 30px; /* Add padding to make space for the bullet */
+        text-indent: -1em; /* Negative indent to position the bullet properly */
+        margin-bottom: 0.5em; /* Add some space between the items */
+        position: relative;
+    }
+    
+    .requirement-item::before {
+        content: '•'; /* Unicode character for the bullet symbol */
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+
+    .requirement-item label {
+        font-size: 16px; 
+        color: black; 
+    }
   </style>
 
 <div class="container">
@@ -221,19 +303,22 @@
             </div>
             <div class="status-row">
                 <span class="docu-type">  {{a.getDocumentType}}</span>
-                <select name="status" class="status-indicator
-                    {% if a.status == 'In Progress' %}status-in-progress
+                <form method="POST" action="{% url 'view_application' a.pk %}">{% csrf_token %}
+                    <select name="status" class="status-indicator {% if a.status == 'In Progress'%}status-in-progress
                     {% elif a.status == 'Lodged' %}status-lodged
                     {% elif a.status == 'Approved' %}status-approved
                     {% elif a.status == 'Rejected' %}status-rejected
-                    {% endif %}">
-                    {{a.getStatus}}
-                    {% for status, status_display in a.statuses %}
-                        <option value="{{ status }}" {% if a.getStatus == status %}selected{% endif %}>
-                            {{ status_display }}
-                        </option>
-                    {% endfor %}
-                </select>
+                    {% endif %}" onchange="this.className=this.options[this.selectedIndex].className">
+                       
+                    
+                        <option value="In Progress" class="status-in-progress" {% if a.getStatus == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        <option value="Lodged" class="status-lodged" {% if a.getStatus == 'Lodged' %}selected{% endif %}>Lodged</option>
+                        <option value="Approved" class="status-approved" {% if a.getStatus == 'Approved' %}selected{% endif %}>Approved</option>
+                        <option value="Rejected" class="status-rejected" {% if a.getStatus == 'Rejected' %}selected{% endif %}>Rejected</option>
+                        <option value="Expired" class="status-expired" {% if a.getStatus == 'Expired' %}selected{% endif %}>Expired</option>
+                        
+                        
+                    </select>
             </div>
             
             <div class="info-row">
@@ -281,18 +366,70 @@
 
         <div class="form-section" style="flex: 1; padding-left: 10px;">
             <div class='tabs'>
-                <a href="#" class="tab active">Additional Details</a>
-                <a href="#" class="tab">History</a>
-                <a href="#" class="tab">Checklist</a>
+                <a href="#additionalDetails" class="tab active" onclick="openTab(event, 'AdditionalDetails')">Additional Details</a>
+                <a href="#history" class="tab" onclick="openTab(event, 'History')">History</a>
+                <a href="#checklist" class="tab" onclick="openTab(event, 'Checklist')">Checklist</a>
             </div>
-          <textarea placeholder="Add details"></textarea>
-          <div class="button-container">
-            <button>Submit</button>
-          </div>
+
+            <div id="AdditionalDetails" class="tabcontent" style="display: block;">
+                <textarea placeholder="Add details"></textarea>
+                <div class="button-container">
+                    <button>Submit</button>
+                </form>
+                </div>
+            </div>
+              
+            <div id="History" class="tabcontent" style="display: none;">
+            <!-- History content goes here -->
+            </div>
+            
+            <div id="Checklist" class="tabcontent" style="display: none;">
+                <div class="tab-content" id="checklist-tab">
+                    <div class="container">
+                        <div class="header">
+                            <h2>PNG Work Permit</h2>
+                            
+                        </div>
+                        <div class="requirement-list">
+                            <div class="requirement-item">
+                            <label>Copy of valid visa</label>
+                            
+                            </div>
+                            <div class="requirement-item">
+                            <label>Employment contract</label>
+                            
+                            </div>
+                            <div class="requirement-item">
+                            <label>Copy of business permit</label>
+                            
+                            </div>
+                            
+                        </div>
+        
+                    </div>
+                  </div>
+            </div>
+          
+    
         </div>
       </div>
     </div>
   </div>
+  <script>
+    function openTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tab");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+    </script>
 
 {% endblock %}
 

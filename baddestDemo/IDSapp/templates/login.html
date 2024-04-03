@@ -171,6 +171,21 @@
         border-radius: 15px;
         background: #0BB351;
     }
+
+    #message-container {
+        text-align: center;
+        padding: 10px 0;
+    }
+    
+    .message-error {
+        display: inline-block;
+        background-color: #FF5252; /* Error background color */
+        color: white; /* Error text color */
+        padding: 10px 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional */
+    }
+    
 </style>
 
 <div class="login-container">
@@ -192,6 +207,9 @@
         </div>
         <button type="submit">Sign in</button>
       </form>
+        {% for message in messages %}
+            {% if message.tags == 'error' %}{{ message }}{% endif %}
+        {% endfor %}
       <p>Don’t have an account? <a href="{% url 'create_account' %}">Create an account</a></p>
     </div>
 
@@ -212,6 +230,7 @@
         </div>
     </div>
     {% endif %}
+
     {% if message.tags == 'info' %}
     <div class="message-section-c">
         <div class="message-circle">
@@ -228,10 +247,14 @@
         </div>
     </div>
     {% endif %}
+
+    
+
+
     {% endfor %}
 </div>
 
 
 
-
+   
 {% endblock %}
