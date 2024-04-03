@@ -118,6 +118,59 @@
     form a:hover {
         text-decoration: underline;
     }
+
+    .message-section {
+        width: 474px;
+        height: 129px;
+        flex-shrink: 0;
+        border-radius: 15px;
+        background: #FF5252;
+    }
+
+    .message-circle {
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+    }
+
+    .message-check {
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+        background: url('{% static "check.png" %}') lightgray 50% / cover no-repeat;
+    }
+
+    .message-content {
+        width: 290px;
+        height: 21px;
+        flex-shrink: 0;
+        color: #FFF;
+        font-family: "Nunito Sans";
+        font-size: 17px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+    }
+
+    .message-subcontent{
+        width: 345px;
+        height: 22px;
+        flex-shrink: 0;
+        color: #FFF;
+        font-family: "Nunito Sans";
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+    }
+
+    .message-section-c {
+        width: 474px;
+        height: 129px;
+        flex-shrink: 0;
+        border-radius: 15px;
+        background: #0BB351;
+    }
 </style>
 
 <div class="login-container">
@@ -141,6 +194,41 @@
       </form>
       <p>Don’t have an account? <a href="{% url 'create_account' %}">Create an account</a></p>
     </div>
+
+    {% for message in messages %}
+    {% if message.tags == 'success' %}
+    <div class="message-section">
+        <div class="message-circle">
+            <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23" cy="23" r="23" fill="#FF8D8D" fill-opacity="0.22"/>
+            </svg>
+            <div class="message-check"></div>
+        </div>
+        <div class="message-content">
+            {{ message }}
+        </div>
+        <div class="message-subcontent">
+            <p>The account has been removed from the system</p>
+        </div>
+    </div>
+    {% endif %}
+    {% if message.tags == 'info' %}
+    <div class="message-section-c">
+        <div class="message-circle">
+            <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23" cy="23" r="23" fill="#75FF75" fill-opacity="0.22"/>
+            </svg>
+            <div class="message-check"></div>
+        </div>
+        <div class="message-content">
+            {{ message }}
+        </div>
+        <div class="message-subcontent">
+            <p>You may now log in to the system</p>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
 </div>
 
 

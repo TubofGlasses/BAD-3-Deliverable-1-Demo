@@ -148,6 +148,10 @@
             <label for="Cpassword">Password</label>
             <input type="password" id="Cpassword" name="Cpassword">
         </div>
+        {% for message in messages %}
+            {% if message.tags == 'error' %}{{ message }}{% endif %}
+        {% endfor %}
+        <!--missing part for the you agree to our terms of use and privacy policy-->
         <button type="submit">Comfirm</button>
       </form>
       <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>

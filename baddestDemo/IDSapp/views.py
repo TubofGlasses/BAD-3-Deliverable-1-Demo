@@ -105,7 +105,7 @@ def login(request):
     else:
         return render(request, 'login.html')
 
-def create_account(request): #this still needs password encryption
+def create_account(request):
     if (request.method == "POST"):
         admin_pass = request.POST.get('adminpass')
         user = request.POST.get('username')
@@ -126,6 +126,7 @@ def create_account(request): #this still needs password encryption
         
         if not mat:
             messages.error(request, 'Invalid Password')
+            return redirect('create_account')
 
         if password != confirm_pass:
             messages.error(request, 'Passwords do not match.')
@@ -142,10 +143,13 @@ def create_account(request): #this still needs password encryption
         )
 
         new_account.save()
+        messages.info(request, 'Account created successfully')
         return redirect('login')
     
     return render(request, 'create_account.html')
 
-def delete_account(request, pk): #this will likely need csrf protection
+@csrf_protect
+def delete_account(request, pk):
     Account.objects.filter(pk=pk).delete()
-    return redirect('login') #change this later to incorporate the delete message
+    messages.success(request, 'Account deleted successfully')
+    return redirect('login')
