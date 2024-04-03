@@ -112,7 +112,7 @@ def create_account(request):
         email = request.POST.get('email')
         password = make_password(request.POST.get('password'))
         confirm_pass = make_password(request.POST.get('Cpassword'))
-        reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
+        reg = "(\d)*([@$!%*#?&])*[A-Za-z\d~`!@#$%^&*()_-+={[}]|\:;<,>.?/]{6,}$"
         pat = re.compile(reg)
         mat = re.search(pat, password)
 
