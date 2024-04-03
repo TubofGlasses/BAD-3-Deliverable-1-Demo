@@ -41,6 +41,7 @@ class Application(models.Model):
     condition = models.CharField(max_length = 20, choices = conditions)
     comment = models.TextField(blank=True, null=True)
     priority = models.IntegerField(default=0)
+    objects = models.Manager()
 
     def getFirstName(self):
         return self.firstName
