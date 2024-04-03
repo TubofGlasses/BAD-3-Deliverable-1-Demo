@@ -1,0 +1,26 @@
+<!--I'll use this to test lmao idk who made it but I'll use it-->
+
+<script>
+    let input = document.getElementById("passIn");
+    let button = document.getElementById("confirmbutton");
+    button.disabled = true;
+    input.addEventListener("change", stateHandle);
+    
+    function stateHandle() {
+        if(input.value === "") {
+            button.disabled = true;
+        } else {
+            button.disabled = false;
+        };
+
+    function on() {
+        document.getElementById("overlay").style.display = "block";
+        };
+
+    function off() {
+        document.getElementById("overlay").style.display = "none";
+        };
+    }
+</script>
+
+

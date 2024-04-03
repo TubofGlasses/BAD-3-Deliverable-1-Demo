@@ -181,6 +181,14 @@ def edit_account(request, pk):
 
 @csrf_protect
 def delete_account(request, pk):
-    Account.objects.filter(pk=pk).delete()
-    messages.success(request, 'Account deleted successfully')
-    return redirect('login')
+    password = make_password(request.POST.get('passIn'))
+    account = get_object_or_404(Account, pk=pk)
+    accountpass = account.getPassword()
+
+    if password == accountpass:
+        Account.objects.filter(pk=pk).delete()
+        messages.success(request, 'Account deleted successfully')
+        return redirect('login')
+    else:
+        messages.info(request, 'Incorrect Password')
+        return redirect('user_profile')
