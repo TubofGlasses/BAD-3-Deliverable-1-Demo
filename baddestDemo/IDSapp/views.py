@@ -92,15 +92,22 @@ def view_application(request,pk): #add pk here
 def login(request):
     if (request.method == "POST"):
         username = request.POST.get('username')
-        password = make_password(request.POST.get('password'))
-        user = authenticate(request, username=username, password=password)
+        password = request.POST.get('password')
+        account = get_object_or_404(Account, username=username)
+        accountpass = account.getPassword()
 
-        if user is not None:
-            login(request, user)
-            return redirect( 'view_dashboard')
-        else:
-            context = {'error': 'Invalid username or password'}
-            return render(request, 'login.html', context)
+        try:
+            
+            if password== accountpass:
+                # Password is correct, manually set the user ID in the session
+                
+                return redirect('view_dashboard')  # Redirect to a success page.
+            else:
+                # Password is incorrect
+                return render(request, 'login.html', {'error': 'Invalid username or password'})
+        except Account.DoesNotExist:
+            # No user found with the given username
+            return render(request, 'login.html', {'error': 'Invalid username or password'})
     
     else:
         return render(request, 'login.html')
