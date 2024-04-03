@@ -199,4 +199,4 @@ def delete_account(request, pk):
         return redirect('login')
     else:
         messages.info(request, 'Incorrect Password')
-        return redirect('user_profile')
+        return redirect('edit_account')
