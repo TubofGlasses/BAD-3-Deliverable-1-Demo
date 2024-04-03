@@ -148,6 +148,37 @@ def create_account(request):
     
     return render(request, 'create_account.html')
 
+def edit_account(request, pk):
+    # Ensure the logged-in user is the account holder
+    account = get_object_or_404(Account, pk=pk)
+    if request.user != account.user:
+        return redirect('view_dashboard')
+
+    if request.method == "POST":
+        current_password = request.POST.get('currentPassword')
+        new_password = request.POST.get('newPassword')
+        confirm_password = request.POST.get('confirmPassword')
+        new_email = request.POST.get('newEmail')
+        
+        # Check if the current password is correct
+        if current_password == account.password:
+            messages.error(request, "Current password is incorrect.")
+            return render(request, 'user_profile.html', {'account': account, 'error': 'current'})
+        
+        # Check if new password and confirm password match
+        if new_password != confirm_password:
+            messages.error(request, "New passwords do not match.")
+            return render(request, 'user_profile.html', {'account': account, 'error': 'mismatch'})
+        
+        # If all checks pass, update the password and possibly other fields
+        account.password = make_password(new_password)
+        account.save()
+        messages.success(request, "Your account has been updated.")
+        return redirect('edit_account')  # Redirect to profile or another appropriate page
+
+    # Render the page for a GET request
+    return render(request, 'user_profile.html', {'account': account})
+
 @csrf_protect
 def delete_account(request, pk):
     Account.objects.filter(pk=pk).delete()

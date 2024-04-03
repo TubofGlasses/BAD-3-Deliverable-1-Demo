@@ -49,109 +49,256 @@
         content: url('{% static "edit_selected.png" %}');
     }
 
+    @keyframes fadeInUp {
+        from {
+            transform: translate(-50%, 0%);
+            opacity: 0;
+        }
+        to {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOutDown {
+        from {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+        }
+        to {
+            transform: translate(-50%, 0%);
+            opacity: 0;
+        }
+    }
+
+    #unsavedChangesAlert {
+        background: #0BB351;
+        border: none;
+        border-radius: 15px;
+        display: none;
+        position: absolute;
+        top: 90%;
+        left: 50%;
+        transform: translate(-50%, 50%);
+        z-index: 1000;
+        width: 100%;
+        max-width: 600px;
+        visibility: hidden;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+
+    .show-alert {
+        visibility: visible !important; 
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .hide-alert {
+        animation: fadeOutDown 0.5s ease forwards;
+    }
+
+    #resetChanges {
+        text-decoration: none;
+    }
+
+    #resetChanges:hover {
+        text-decoration: underline;
+    }
+
+    .overflow-hidden {
+        overflow: hidden;
+    }
 </style>
 
-<!-- Apply the flex-container class here -->
 <div class="flex-container">
     <div class="card" style="border: none; border-bottom-left-radius: 30px; border-top-left-radius: 30px;">
         <div class="card-body">
             <h2 class="card-title mt-3" style="margin-left: 30px; margin-right: 30px; color: #0BB351; font-weight: bold; border-bottom: 3px solid #0BB351;">User Profile</h2>
         </div>
     </div>
-    <!-- This is your dynamic card that should stretch to the bottom -->
     <div id="dynamicCard" class="card mt-4 flex-grow">
-        <div class="container-fluid">
-            <div style="margin-left: 30px; margin-right: 30px;">
+        <form method="post" action="{% url 'edit_account' request.user.pk %}">
+            {% csrf_token %}
+            <div class="container-fluid">
+                <div style="margin-left: 30px; margin-right: 30px;">
 
-                <!--Email Address Section -->
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <h5 class="mt-4 email-text" style="font-weight: bold;">Email Address</h5>
+                    <!--Email Address Section -->
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <h5 class="mt-4" id="emailText" style="font-weight: bold;">Email Address</h5>
+                        </div>
+                        <div class="col-auto" style="padding-top: 10px">
+                            <button id="emailButton" class="edit-button" data-open="false">
+                                <img src="{% static 'edit.png' %}" width="20" height="20" alt="Edit">
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-auto" style="padding-top: 10px">
-                        <button id="emailButton">
-                            <img src="{% static 'edit.png' %}" width="20" height="20" alt="Edit">
-                        </button>
-                    </div>
-                </div>
 
-                <div id="emailDisplayRow" class="row">
-                    <p class="mt-4">Your email address is placeholder@outlook.com</p>
-                </div>
-    
-                <!-- Email Input -->
-                <div id="emailInputRow" class="row" style="display: none;">
-                    <input type="email" class="form-control mt-4" id="emailInput" placeholder="Enter new email address" style="margin-left: 12px; margin-bottom: 30px; width: 400px">
-                </div>
+                    <div id="emailDisplayRow" class="row">
+                        <p class="mt-4">Your email address is <span style="color: #0BB351; text-decoration: underline #FF5252;"></span></p>
+                    </div>
+        
+                    <!-- Email Input -->
+                    <div id="emailInputRow" class="row" style="display: none;">
+                        <input type="email" class="form-control mt-4" id="email" placeholder="Enter new email address" value="" style="margin-left: 12px; margin-bottom: 30px; width: 400px">
+                    </div>
 
-                <hr>
+                    <hr>
 
-                <!--Password Section -->
-                <div class="row align-items-center" id="passwordRow" style="margin-bottom: 30px;">
-                    <div class="col-auto">
-                        <h5 class="mt-3" style="font-weight: bold;">Change Password</h5>
+                    <!--Password Section -->
+                    <div class="row align-items-center" id="passwordRow" style="margin-bottom: 30px;">
+                        <div class="col-auto">
+                            <h5 class="mt-3" id="passwordText" style="font-weight: bold;">Change Password</h5>
+                        </div>
+                        <div class="col-auto" style="padding-top: 5px">
+                            <button id="passwordButton" class="edit-button" data-open="false">
+                                <img src="{% static 'edit.png' %}" width="20" height="20" alt="Edit">
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-auto" style="padding-top: 5px">
-                        <button id="passwordButton">
-                            <img src="{% static 'edit.png' %}" width="20" height="20" alt="Edit">
-                        </button>
+                    <div id="passwordInputRow" class="row" style="display: none;">
+                        <div class="col-auto">
+                            <input type="password" class="form-control mt-4" id="currentPasswordInput" placeholder="Current Password" style="margin-bottom: 30px; width: 300px">
+                        </div>
+                        <div class="col-auto">
+                            <input type="password" class="form-control mt-4" id="newPasswordInput" placeholder="New Password" style="margin-bottom: 30px; width: 300px">
+                        </div>
+                        <div class="col-auto">
+                            <input type="password" class="form-control mt-4" id="confirmPasswordInput" placeholder="Confirm New Password" style="margin-bottom: 30px; width: 300px">
+                        </div>
                     </div>
-                </div>
-                <div id="passwordInputRow" class="row" style="display: none;">
-                    <div class="col-auto">
-                        <input type="password" class="form-control mt-4" id="currentPasswordInput" placeholder="Current Password" style="margin-bottom: 30px; width: 300px">
-                    </div>
-                    <div class="col-auto">
-                        <input type="password" class="form-control mt-4" id="newPasswordInput" placeholder="New Password" style="margin-bottom: 30px; width: 300px">
-                    </div>
-                    <div class="col-auto">
-                        <input type="password" class="form-control mt-4" id="confirmPasswordInput" placeholder="Confirm New Password" style="margin-bottom: 30px; width: 300px">
-                    </div>
-                </div>
 
-                <hr>
+                    <hr>
 
-                <!-- Delete Account Section -->
-                <div class="row align-items-center">
-                    <h5 class="mt-3" style="font-weight: bold;">Delete Account</h5>
-                </div>
-                <div>
-                    <p class="mt-4">Deletion is <span style="color: #FF5252; text-decoration: underline #FF5252;">permanent and irreversible</span>. This removes all access to all connected services and deletes all spaces and user data. You cannot undo this action.</p>
-                    <button class="btn mt-3" style="display: inline-flex; padding: 7px 39px; align-items: flex-start; gap: 10px; border-radius: 15px; background: #FF5252; color: #FFF;"> Delete account </button>
+                    <!-- Delete Account Section -->
+                    <div class="row align-items-center">
+                        <h5 class="mt-3" style="font-weight: bold;">Delete Account</h5>
+                    </div>
+                    <div>
+                        <p class="mt-4">Deletion is <span style="color: #FF5252; text-decoration: underline #FF5252;">permanent and irreversible</span>. This removes all access to all connected services and deletes all spaces and user data. You cannot undo this action.</p>
+                        <button class="btn mt-3" style="display: inline-flex; padding: 7px 39px; align-items: flex-start; gap: 10px; border-radius: 15px; background: #FF5252; color: #FFF;"> Delete account </button>
+                    </div>
+
                 </div>
             </div>
-        </div>
+            <!-- Unsaved Changes Alert -->
+            <div id="unsavedChangesAlert" class="alert alert-warning">
+                <div class="row w-100 no-gutters align-items-center">
+                    <div class="col" style="margin-left: 20px; color:#FFF">
+                        You have unsaved changes.
+                    </div>
+                    <div class="col-auto ml-auto text-right">
+                        <button id="resetChanges" class="btn btn-sm p-0" style="color: #FFF; background-color: transparent; border: none; margin-right: 10px;">Reset</button>
+                        <button type="submit" id="saveChanges" class="btn btn-sm" style="background: #08873d; color: #fff; border-radius: 10px">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
+    
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        var unsavedChangesAlert = document.getElementById('unsavedChangesAlert');
+        var resetChangesButton = document.getElementById('resetChanges');
+        var saveChangesButton = document.getElementById('saveChanges');
+        var editButtons = document.querySelectorAll('.edit-button');
+        var editStates = {}; // Object to keep track of each button's state
+
+        editButtons.forEach(function(button, index) {
+            // Initialize all edit buttons' state as closed
+            editStates[index] = false;
+
+            button.addEventListener('click', function() {
+                // Toggle state
+                editStates[index] = !editStates[index];
+
+                // Check if any edit button is still open
+                var anyOpen = Object.values(editStates).some(state => state === true);
+
+                if (anyOpen) {
+                    // If any edit button is open, show the alert
+                    if (!unsavedChangesAlert.classList.contains('show-alert')) {
+                        unsavedChangesAlert.classList.add('show-alert');
+                        unsavedChangesAlert.classList.remove('hide-alert');
+                        unsavedChangesAlert.style.display = 'block';
+                    }
+                } else {
+                    // If all edit buttons are closed, hide the alert
+                    if (!unsavedChangesAlert.classList.contains('hide-alert')) {
+                        unsavedChangesAlert.classList.add('hide-alert');
+                        setTimeout(function() {
+                            unsavedChangesAlert.classList.remove('show-alert', 'hide-alert');
+                            unsavedChangesAlert.style.display = 'none';
+                        }, 500); // Wait for animation to finish
+                    }
+                }
+            });
+        });
+
+        var inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                unsavedChangesAlert.classList.add('show-alert');
+                unsavedChangesAlert.style.display = 'block';
+            });
+        });
+        resetChangesButton.addEventListener('click', function() {
+            // Close all edit sections and reset their state
+            editButtons.forEach((button, index) => {
+                editStates[index] = false;
+            });
+            // Hide the alert with animation
+            unsavedChangesAlert.classList.add('hide-alert');
+            setTimeout(function() {
+                unsavedChangesAlert.classList.remove('show-alert', 'hide-alert');
+                unsavedChangesAlert.style.display = 'none';
+            }, 500); // Wait for animation to finish
+            window.location.reload();
+        });
+
+    //buttons
         var emailButton = document.getElementById('emailButton');
+        var emailButtonImage = emailButton.querySelector('img');
         var emailDisplayRow = document.getElementById('emailDisplayRow');
         var emailInputRow = document.getElementById('emailInputRow');
+        var emailText = document.getElementById('emailText');
+
+        var originalImageUrl = '{% static "edit.png" %}';
+        var selectedImageUrl = '{% static "edit_selected.png" %}';
     
         emailButton.addEventListener('click', function() {
             if (emailDisplayRow.style.display != 'none' && emailInputRow.style.display === 'none') {
                 emailDisplayRow.style.display = 'none';
                 emailInputRow.style.display = 'flex';
+                emailText.style.color = '#0BB351';
+                emailButtonImage.src = selectedImageUrl;
             } else {
                 emailDisplayRow.style.display = 'flex';
                 emailInputRow.style.display = 'none';
+                emailText.style.color = 'black'
+                emailButtonImage.src = originalImageUrl;
             }
         });
         
         var passwordRow = document.getElementById('passwordRow');
         var passwordButton = document.getElementById('passwordButton');
+        var passwordButtonImage = passwordButton.querySelector('img');
         var passwordInputRow = document.getElementById('passwordInputRow');
+        var passwordText = document.getElementById('passwordText');
     
         passwordButton.addEventListener('click', function() {
-            
             if (passwordInputRow.style.display === 'none' && passwordRow.style.marginBottom === '30px') {
                 passwordRow.style.marginBottom = '0px';
-                passwordInputRow.style.display = 'flex'; // Use 'flex' to maintain the row structure
+                passwordInputRow.style.display = 'flex';
+                passwordText.style.color = '#0BB351';
+                passwordButtonImage.src = selectedImageUrl;
             } else {
                 passwordRow.style.marginBottom = '30px';
                 passwordInputRow.style.display = 'none';
+                passwordText.style.color = 'black';
+                passwordButtonImage.src = originalImageUrl;
             }
         });
     });
