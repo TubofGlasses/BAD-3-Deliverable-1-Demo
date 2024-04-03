@@ -97,7 +97,6 @@ def login(request):
         accountpass = account.getPassword()
 
         try:
-            
             if password== accountpass:
                 # Password is correct, manually set the user ID in the session
                 

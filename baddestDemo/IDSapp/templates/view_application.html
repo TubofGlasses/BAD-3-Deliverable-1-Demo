@@ -221,14 +221,19 @@
             </div>
             <div class="status-row">
                 <span class="docu-type">  {{a.getDocumentType}}</span>
-                <span class="status-indicator
+                <select name="status" class="status-indicator
                     {% if a.status == 'In Progress' %}status-in-progress
                     {% elif a.status == 'Lodged' %}status-lodged
                     {% elif a.status == 'Approved' %}status-approved
                     {% elif a.status == 'Rejected' %}status-rejected
                     {% endif %}">
                     {{a.getStatus}}
-                </span>
+                    {% for status, status_display in a.statuses %}
+                        <option value="{{ status }}" {% if a.getStatus == status %}selected{% endif %}>
+                            {{ status_display }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
             
             <div class="info-row">
