@@ -206,3 +206,10 @@ def delete_account(request, pk):
     else:
         messages.info(request, 'Incorrect Password')
         return redirect('edit_account')
+    
+def edit_application(request, pk): #this is only update status for now
+    application = get_object_or_404(Application, pk=pk)
+    status = request.POST.get('status')
+    application.status = status
+    application.save()
+    return redirect('view_dashboard')
