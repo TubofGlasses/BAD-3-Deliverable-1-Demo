@@ -12,5 +12,5 @@ urlpatterns = [
     path('view_application/<int:pk>/', views.view_application, name='view_application'),
     path('login', views.login, name='login'),
     path('create_account', views.create_account, name = 'create_account'),
-    path('delete_account', views.delete_account, name = 'delete_account'),
+    path('delete_account/<int:pk>/', views.delete_account, name = 'delete_account'),
 ]
