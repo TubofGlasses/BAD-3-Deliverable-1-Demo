@@ -106,16 +106,17 @@ def login(request):
         return render(request, 'login.html')
 
 def create_account(request):
-    if (request.method == "POST"):
+    if request.method == "POST":
         admin_pass = request.POST.get('adminpass')
         user = request.POST.get('username')
         email = request.POST.get('email')
-        password = make_password(request.POST.get('password'))
-        confirm_pass = make_password(request.POST.get('Cpassword'))
-        reg = "(\d)*([@$!%*#?&])*[A-Za-z\d~`!@#$%^&*()_-+={[}]|\:;<,>.?/]{6,}$"
+        password = request.POST.get('password')
+        confirm_pass = request.POST.get('Cpassword')
+        reg = "(\d)*([@$!%*#?&])*[A-Za-z\d~`!@#$%^&*()_+={[}]|\:;<,>.?/-]{6,}$"
         pat = re.compile(reg)
         mat = re.search(pat, password)
 
+        # Check if an account with the provided email or username already exists
         if Account.objects.filter(email=email).exists():
             messages.error(request, 'There is already an account associated with this email.')
             return redirect('create_account')
@@ -124,28 +125,36 @@ def create_account(request):
             messages.error(request, 'Username is already taken.')
             return redirect('create_account')
         
+        # Validate password complexity
         if not mat:
             messages.error(request, 'Invalid Password')
             return redirect('create_account')
 
+        # Check if password and confirm password match
         if password != confirm_pass:
             messages.error(request, 'Passwords do not match.')
             return redirect('create_account')
 
-        if admin_pass != admin_pass: #placeholder for wherever I will get admin password from
+        # Placeholder for admin password validation
+        if admin_pass != "admin_pass":  # Replace "admin_pass" with the actual admin password
             messages.error(request, 'Admin password provided is incorrect.')
             return redirect('create_account')
 
+        # Hash the password before saving it
+        hashed_password = make_password(password)
+
+        # Create the new account instance
         new_account = Account(
-            username = user,
-            email = email,
-            password = password,
+            username=user,
+            email=email,
+            password=hashed_password,
         )
 
+        # Save the new account
         new_account.save()
         messages.info(request, 'Account created successfully')
         return redirect('login')
-    
+
     return render(request, 'create_account.html')
 
 def edit_account(request):
