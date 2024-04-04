@@ -99,7 +99,7 @@ def view_application(request,pk): #add pk here
     return render(request, 'view_application.html',{'a':a})
 
 
-
+@csrf_protect
 def login(request):
     if request.method == "POST":
         username = request.POST.get('username')
@@ -148,6 +148,9 @@ def create_account(request):
             messages.error(request, 'Invalid password.')
             return redirect('create_account')
         
+        if admin_pass != 'admin_pass':
+            messages.error(request, 'Incorrect admin password')
+            return redirect('create_account')
         
         # Assuming admin_pass check passes and other validations are ok
         try:

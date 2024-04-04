@@ -208,45 +208,22 @@
         <button type="submit">Sign in</button>
       </form>
         {% for message in messages %}
-            {% if message.tags == 'error' %}{{ message }}{% endif %}
+            {% if message.tags == 'error' %}<font color='red'>{{ message }}</font>{% endif %}
         {% endfor %}
       <p>Don’t have an account? <a href="{% url 'create_account' %}">Create an account</a></p>
+      {% for message in messages %}
+      {% if message.tags == 'success' %}
+              {{ message }}
+              <p> <font color='red'>The account has been removed from the system</font></p>
+      {% endif %}
+  
+      {% if message.tags == 'info' %}
+          {{ message }}
+          <p><font color='green'>You may now log in to the system</font></p>
+      {% endif %}
     </div>
 
-    {% for message in messages %}
-    {% if message.tags == 'success' %}
-    <div class="message-section">
-        <div class="message-circle">
-            <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="23" cy="23" r="23" fill="#FF8D8D" fill-opacity="0.22"/>
-            </svg>
-            <div class="message-check"></div>
-        </div>
-        <div class="message-content">
-            {{ message }}
-        </div>
-        <div class="message-subcontent">
-            <p>The account has been removed from the system</p>
-        </div>
-    </div>
-    {% endif %}
 
-    {% if message.tags == 'info' %}
-    <div class="message-section-c">
-        <div class="message-circle">
-            <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="23" cy="23" r="23" fill="#75FF75" fill-opacity="0.22"/>
-            </svg>
-            <div class="message-check"></div>
-        </div>
-        <div class="message-content">
-            {{ message }}
-        </div>
-        <div class="message-subcontent">
-            <p>You may now log in to the system</p>
-        </div>
-    </div>
-    {% endif %}
 
     
 
