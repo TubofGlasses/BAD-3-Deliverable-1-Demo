@@ -46,7 +46,7 @@
 
     #passwordButton:hover img,
     #passwordButton:focus img {
-        content: url('{% static "edit_selected.png" %}');
+        content: url('{% static "edit_selected1.png" %}');
     }
 
     @keyframes fadeInUp {
@@ -216,8 +216,6 @@
         </div>
     </div>
     <div id="dynamicCard" class="card mt-4 flex-grow">
-        <form method="post" action="{% url 'edit_account'%}">
-            {% csrf_token %}
             <div class="container-fluid">
                 <div style="margin-left: 30px; margin-right: 30px;">
 
@@ -227,7 +225,7 @@
                             <h5 class="mt-4" id="emailText" style="font-weight: bold;">Email Address</h5>
                         </div>
                         <div class="col-auto" style="padding-top: 10px">
-                            <button id="emailButton" class="edit-button" data-open="false">
+                            <button type="button" id="emailButton" class="edit-button" data-open="false">
                                 <img src="{% static 'edit.png' %}" width="20" height="20" alt="Edit">
                             </button>
                         </div>
@@ -239,7 +237,15 @@
         
                     <!-- Email Input -->
                     <div id="emailInputRow" class="row" style="display: none;">
-                        <input type="email" class="form-control mt-4" id="email" name="newEmail" placeholder="Enter new email address" style="margin-left: 12px; margin-bottom: 30px; width: 400px">
+                        <form method="post" action="{% url 'edit_account'%}">
+                        {% csrf_token %}
+                            <div class="row">
+                                <input type="email" class="form-control mt-4" id="email" name="newEmail" placeholder="Enter new email address" style="margin-left: 12px; margin-bottom: 20px; width: 400px">
+                            </div>
+                            <div class="row">
+                                <button type="submit" id="saveChanges" class="btn btn-sm" style="background: #08873d; color: #fff; border-radius: 10px; width: 120px; margin-left: 10px;">Save Changes</button>
+                            </div>
+                        </form>
                     </div>
 
                     <hr>
@@ -250,23 +256,31 @@
                             <h5 class="mt-3" id="passwordText" style="font-weight: bold;">Change Password</h5>
                         </div>
                         <div class="col-auto" style="padding-top: 5px">
-                            <button id="passwordButton" class="edit-button" data-open="false">
-                                <img src="{% static 'edit.png' %}" width="20" height="20" alt="Edit">
+                            <button type="button" id="passwordButton" class="edit-button" data-open="false">
+                                <img src="{% static 'edit1.png' %}" width="20" height="20" alt="Edit">
                             </button>
                         </div>
                     </div>
                     <div id="passwordInputRow" class="row" style="display: none;">
-                        <div class="col-auto">
-                            <input type="password" class="form-control mt-4" id="currentPasswordInput" name="currentPassword" placeholder="Current Password" style="margin-bottom: 30px; width: 300px">
-                        </div>
-                        <div class="col-auto">
-                            <input type="password" class="form-control mt-4" id="newPasswordInput" name="newPassword" placeholder="New Password" style="margin-bottom: 30px; width: 300px">
-                        </div>
-                        <div class="col-auto">
-                            <input type="password" class="form-control mt-4" id="confirmPasswordInput" name="confirmPassword" placeholder="Confirm New Password" style="margin-bottom: 30px; width: 300px">
-                        </div>
+                        <form method="post" action="{% url 'edit_account'%}">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-auto">
+                                    <input type="password" class="form-control mt-4" id="currentPassword" name="currentPassword" placeholder="Current Password" style="margin-bottom: 20px; width: 300px">
+                                </div>
+                                <div class="col-auto">
+                                    <input type="password" class="form-control mt-4" id="newPassword" name="newPassword" placeholder="New Password" style="margin-bottom: 20px; width: 300px">
+                                </div>
+                                <div class="col-auto">
+                                    <input type="password" class="form-control mt-4" id="confirmPassword" name="confirmPassword" placeholder="Confirm New Password" style="margin-bottom: 20px; width: 300px">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <button type="submit" id="saveChanges" class="btn btn-sm" style="background: #08873d; color: #fff; border-radius: 10px; width: 120px; margin-left: 10px;">Save Changes</button>
+                            </div>
+                        </form>
                     </div>
-
+                    
                     <hr>
 
                     <!-- Delete Account Section -->
@@ -282,25 +296,12 @@
                     </div>
                     <div class="row mt-3" style="margin-left: 10px;">
                         {% for message in messages %}
-                            <span style="color: #FF5252;">{% if message.tags == 'info' %}{{ message }}{% endif %}</span>
+                            <span style="color: #FF5252;">{{ message }}</span>
                         {% endfor %}
                     </div>
 
                 </div>
             </div>
-            <!-- Unsaved Changes Alert -->
-            <div id="unsavedChangesAlert" class="alert alert-warning">
-                <div class="row w-100 no-gutters align-items-center">
-                    <div class="col" style="margin-left: 20px; color:#FFF">
-                        You have unsaved changes.
-                    </div>
-                    <div class="col-auto ml-auto text-right">
-                        <button id="resetChanges" class="btn btn-sm p-0" style="color: #FFF; background-color: transparent; border: none; margin-right: 10px;">Reset</button>
-                        <button type="submit" id="saveChanges" class="btn btn-sm" style="background: #08873d; color: #fff; border-radius: 10px">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-        </form>
         <!-- Modal -->
         <div class="modal fade" id="deleteAccountModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -332,59 +333,28 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var unsavedChangesAlert = document.getElementById('unsavedChangesAlert');
-        var emailButton = document.getElementById('emailButton');
+        var passwordRow = document.getElementById('passwordRow');
         var passwordButton = document.getElementById('passwordButton');
-        var resetChangesButton = document.getElementById('resetChanges');
-    
-        var emailSectionOpen = false;
-        var passwordSectionOpen = false;
+        var passwordButtonImage = passwordButton.querySelector('img');
+        var passwordInputRow = document.getElementById('passwordInputRow');
+        var passwordText = document.getElementById('passwordText');
 
-        resetChangesButton.addEventListener('click', function() {
-            window.location.reload();
-        });
+        var originalImageUrl = '{% static "edit1.png" %}';
+        var selectedImageUrl = '{% static "edit_selected1.png" %}';
     
-        // Function to check if both sections are closed
-        function areBothSectionsClosed() {
-            return !emailSectionOpen && !passwordSectionOpen;
-        }
-    
-        // Function to toggle the alert
-        function toggleAlert() {
-            if (areBothSectionsClosed()) {
-                unsavedChangesAlert.classList.add('hide-alert');
-                setTimeout(function() {
-                    unsavedChangesAlert.classList.remove('show-alert', 'hide-alert');
-                    unsavedChangesAlert.style.display = 'none';
-                }, 500);
+        passwordButton.addEventListener('click', function() {
+            if (passwordInputRow.style.display === 'none' && passwordRow.style.marginBottom === '30px') {
+                passwordRow.style.marginBottom = '0px';
+                passwordInputRow.style.display = 'flex';
+                passwordText.style.color = '#0BB351';
+                passwordButtonImage.src = selectedImageUrl;
             } else {
-                unsavedChangesAlert.classList.add('show-alert');
-                unsavedChangesAlert.classList.remove('hide-alert');
-                unsavedChangesAlert.style.display = 'block';
+                passwordRow.style.marginBottom = '30px';
+                passwordInputRow.style.display = 'none';
+                passwordText.style.color = 'black';
+                passwordButtonImage.src = originalImageUrl;
             }
-        }
-    
-        // Event listener for the email edit button
-        emailButton.addEventListener('click', function(event) {
-            event.stopPropagation();
-            emailSectionOpen = !emailSectionOpen;
-            toggleAlert();
         });
-    
-        // Event listener for the password edit button
-        passwordButton.addEventListener('click', function(event) {
-            event.stopPropagation();
-            passwordSectionOpen = !passwordSectionOpen;
-            toggleAlert();
-        });
-    
-        var form = document.querySelector('form');
-        form.addEventListener('click', function(event) {
-            event.stopPropagation();
-        });
-    
-        document.addEventListener('click', function() {
-        }, true);
     });
     document.addEventListener('DOMContentLoaded', function() {
     //buttons
@@ -408,26 +378,6 @@
                 emailInputRow.style.display = 'none';
                 emailText.style.color = 'black'
                 emailButtonImage.src = originalImageUrl;
-            }
-        });
-        
-        var passwordRow = document.getElementById('passwordRow');
-        var passwordButton = document.getElementById('passwordButton');
-        var passwordButtonImage = passwordButton.querySelector('img');
-        var passwordInputRow = document.getElementById('passwordInputRow');
-        var passwordText = document.getElementById('passwordText');
-    
-        passwordButton.addEventListener('click', function() {
-            if (passwordInputRow.style.display === 'none' && passwordRow.style.marginBottom === '30px') {
-                passwordRow.style.marginBottom = '0px';
-                passwordInputRow.style.display = 'flex';
-                passwordText.style.color = '#0BB351';
-                passwordButtonImage.src = selectedImageUrl;
-            } else {
-                passwordRow.style.marginBottom = '30px';
-                passwordInputRow.style.display = 'none';
-                passwordText.style.color = 'black';
-                passwordButtonImage.src = originalImageUrl;
             }
         });
 

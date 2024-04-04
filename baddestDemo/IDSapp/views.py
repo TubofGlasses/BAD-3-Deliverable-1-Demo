@@ -100,30 +100,21 @@ def view_application(request,pk): #add pk here
 
 
 
+from django.contrib.auth import authenticate, login as django_login
+
 def login(request):
     if request.method == "POST":
         username = request.POST.get('username')
         raw_password = request.POST.get('password')
 
-        try:
-            account = Account.objects.get(username=username)
-            if check_password(raw_password, account.password):
-                # Since we're not using Django's built-in User model directly, we need a workaround to log the user in.
-                # One approach is to attach the account ID to the session manually (see below).
-                # Another approach is to have a corresponding User model instance for each Account and log that User in.
-                # Here's an example of the latter:
-
-                # Try to get the corresponding User instance. If it doesn't exist, create one.
-                user, created = User.objects.get_or_create(username=account.username)
-                if created:
-                    user.set_password(raw_password)  # Set a password for the User instance if it's newly created
-                    user.save()
-
-                django_login(request, user, backend='django.contrib.auth.backends.ModelBackend')  # Log the user in
-                return redirect('view_dashboard')
-            else:
-                messages.error(request, 'Invalid username or password')
-        except Account.DoesNotExist:
+        # Authenticate the user using Django's system
+        user = authenticate(request, username=username, password=raw_password)
+        if user is not None:
+            # User is authenticated, proceed to log them in
+            django_login(request, user)
+            return redirect('view_dashboard')
+        else:
+            # Authentication failed, handle login error
             messages.error(request, 'Invalid username or password')
 
     return render(request, 'login.html')
@@ -135,19 +126,15 @@ def create_account(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_pass = request.POST.get('Cpassword')
-        reg = '^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$'
-        pat = re.compile(reg)
-        mat = re.search(password, pat)
 
-        # Additional validation and checks...
         if password != confirm_pass:
             messages.error(request, 'Passwords do not match.')
             return redirect('create_account')
-        
-        if not mat:
-            messages.error(request, 'Invalid password.')
+
+        # Placeholder for admin password validation
+        if admin_pass != "admin_pass":  # Replace "admin_pass" with the actual admin password
+            messages.error(request, 'Admin password provided is incorrect.')
             return redirect('create_account')
-        
         
         # Assuming admin_pass check passes and other validations are ok
         try:
@@ -173,17 +160,21 @@ def edit_account(request):
         new_password = request.POST.get('newPassword')
         confirm_password = request.POST.get('confirmPassword')
 
+        password_check = request.user.check_password(current_password)
+
         # Update email if it has changed
         if new_email and new_email != request.user.email:
             request.user.email = new_email
             request.user.save()
-            messages.success(request, "Your email has been updated.")
+            messages.error(request, "Your email has been updated.")
 
         # Change password
         if current_password and new_password and confirm_password:
+            print("Current password (from form):", password_check)
+            print("Hashed password (from database):", request.user.password)
             if request.user.check_password(current_password):
                 if new_password == confirm_password:
-                    request.user.set_password(new_password)
+                    request.user.password = make_password(new_password)
                     request.user.save()
                     # Keep the user logged in after changing the password
                     update_session_auth_hash(request, request.user)
@@ -196,7 +187,7 @@ def edit_account(request):
         return redirect('edit_account')
 
     # Pass the user's email to the template to display it
-    context = {'user_email': request.user.email}
+    context = {'user_email': request.user.email, 'user_pass': request.user.password}
     return render(request, 'user_profile.html', context)
 
 @login_required
