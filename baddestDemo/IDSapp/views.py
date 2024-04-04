@@ -137,7 +137,7 @@ def create_account(request):
         confirm_pass = request.POST.get('Cpassword')
         reg = '^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$'
         pat = re.compile(reg)
-        mat = re.search(password, pat)
+        mat = re.search(pat, password)
 
         # Additional validation and checks...
         if password != confirm_pass:
