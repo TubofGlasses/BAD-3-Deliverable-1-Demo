@@ -168,10 +168,15 @@ def edit_account(request):
 
         password_check = request.user.check_password(current_password)
 
+        user = request.user
+        account = Account.objects.get(user=user)
+
         # Update email if it has changed
         if new_email and new_email != request.user.email:
             request.user.email = new_email
+            account.email = new_email
             request.user.save()
+            account.save()
             messages.error(request, "Your email has been updated.")
 
         # Change password
@@ -182,6 +187,8 @@ def edit_account(request):
                 if new_password == confirm_password:
                     request.user.password = make_password(new_password)
                     request.user.save()
+                    account.password = request.user.check_password(new_password)
+                    account.save()
                     # Keep the user logged in after changing the password
                     update_session_auth_hash(request, request.user)
                     messages.success(request, "Your password has been updated.")
@@ -209,7 +216,6 @@ def delete_account(request):
             # Delete the User instance
             user.delete()
             messages.success(request, 'Account deleted successfully.')
-            logout(request)  # Log out the user after account deletion
             return redirect('login')
         else:
             messages.error(request, 'Incorrect Password.')
