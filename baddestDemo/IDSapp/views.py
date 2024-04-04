@@ -126,7 +126,13 @@ def create_account(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_pass = request.POST.get('Cpassword')
-
+        reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
+        pat = re.compile(reg)
+        mat = re.search(pat, password)
+        
+        if not mat:
+            messages.error(request, 'Invalid Password')
+            return redirect('create_account')
         if password != confirm_pass:
             messages.error(request, 'Passwords do not match.')
             return redirect('create_account')
