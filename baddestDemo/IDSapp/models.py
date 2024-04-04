@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from datetime import timedelta, date
 
 # Create your models here.
@@ -117,6 +118,7 @@ class Application(models.Model):
         super(Application, self).save(*args, **kwargs)
 
 class Account(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     username = models.CharField(max_length = 255)
     password = models.CharField(max_length = 255)
     email = models.EmailField(max_length = 254)

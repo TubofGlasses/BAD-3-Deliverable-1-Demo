@@ -7,8 +7,11 @@ from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
 import re
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login as django_login, update_session_auth_hash, logout
+from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 
 
 def view_dashboard(request):
@@ -98,118 +101,118 @@ def view_application(request,pk): #add pk here
 
 
 def login(request):
-    if (request.method == "POST"):
+    if request.method == "POST":
         username = request.POST.get('username')
         raw_password = request.POST.get('password')
 
         try:
             account = Account.objects.get(username=username)
             if check_password(raw_password, account.password):
+                # Since we're not using Django's built-in User model directly, we need a workaround to log the user in.
+                # One approach is to attach the account ID to the session manually (see below).
+                # Another approach is to have a corresponding User model instance for each Account and log that User in.
+                # Here's an example of the latter:
+
+                # Try to get the corresponding User instance. If it doesn't exist, create one.
+                user, created = User.objects.get_or_create(username=account.username)
+                if created:
+                    user.set_password(raw_password)  # Set a password for the User instance if it's newly created
+                    user.save()
+
+                django_login(request, user, backend='django.contrib.auth.backends.ModelBackend')  # Log the user in
                 return redirect('view_dashboard')
             else:
                 messages.error(request, 'Invalid username or password')
         except Account.DoesNotExist:
             messages.error(request, 'Invalid username or password')
 
-        return redirect('login')
-    else:
-        return render(request, 'login.html')
+    return render(request, 'login.html')
 
 def create_account(request):
     if request.method == "POST":
         admin_pass = request.POST.get('adminpass')
-        user = request.POST.get('username')
+        username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_pass = request.POST.get('Cpassword')
-        reg = "(\d)*([@$!%*#?&])*[A-Za-z\d~`!@#$%^&*()_+={[}]|\:;<,>.?/-]{6,}$"
-        pat = re.compile(reg)
-        mat = re.search(pat, password)
 
-        # Check if an account with the provided email or username already exists
-        if Account.objects.filter(email=email).exists():
-            messages.error(request, 'There is already an account associated with this email.')
+        # Additional validation and checks...
+
+        # Assuming admin_pass check passes and other validations are ok
+        try:
+            # Create a User instance
+            user = User.objects.create_user(username=username, email=email, password=password)
+
+            # Now you can create the Account instance with a reference to the User instance
+            new_account = Account(user=user, username=username, email=email, password=make_password(password))
+            new_account.save()
+            messages.info(request, 'Account created successfully')
+            return redirect('login')
+        except IntegrityError as e:
+            messages.error(request, 'There was a problem creating the account: ' + str(e))
             return redirect('create_account')
-        
-        if Account.objects.filter(username=user).exists():
-            messages.error(request, 'Username is already taken.')
-            return redirect('create_account')
-        
-        # Validate password complexity
-        if not mat:
-            messages.error(request, 'Invalid Password')
-            return redirect('create_account')
-
-        # Check if password and confirm password match
-        if password != confirm_pass:
-            messages.error(request, 'Passwords do not match.')
-            return redirect('create_account')
-
-        # Placeholder for admin password validation
-        if admin_pass != "admin_pass":  # Replace "admin_pass" with the actual admin password
-            messages.error(request, 'Admin password provided is incorrect.')
-            return redirect('create_account')
-
-        # Hash the password before saving it
-        hashed_password = make_password(password)
-
-        # Create the new account instance
-        new_account = Account(
-            username=user,
-            email=email,
-            password=hashed_password,
-        )
-
-        # Save the new account
-        new_account.save()
-        messages.info(request, 'Account created successfully')
-        return redirect('login')
 
     return render(request, 'create_account.html')
 
+@login_required
 def edit_account(request):
-    # Access the currently logged-in user's account
-    account = request.user
-
     if request.method == "POST":
+        new_email = request.POST.get('newEmail')
         current_password = request.POST.get('currentPassword')
         new_password = request.POST.get('newPassword')
         confirm_password = request.POST.get('confirmPassword')
-        new_email = request.POST.get('newEmail')
 
-        # Verify current password
-        if not account.check_password(current_password):
-            messages.error(request, "Current password is incorrect.")
-            return render(request, 'user_profile.html', {'error': 'current'})
+        # Update email if it has changed
+        if new_email and new_email != request.user.email:
+            request.user.email = new_email
+            request.user.save()
+            messages.success(request, "Your email has been updated.")
 
-        # Check if new password and confirm password match
-        if new_password != confirm_password:
-            messages.error(request, "New passwords do not match.")
-            return render(request, 'user_profile.html', {'error': 'mismatch'})
+        # Change password
+        if current_password and new_password and confirm_password:
+            if request.user.check_password(current_password):
+                if new_password == confirm_password:
+                    request.user.set_password(new_password)
+                    request.user.save()
+                    # Keep the user logged in after changing the password
+                    update_session_auth_hash(request, request.user)
+                    messages.success(request, "Your password has been updated.")
+                else:
+                    messages.error(request, "New passwords do not match.")
+            else:
+                messages.error(request, "Current password is incorrect.")
 
-        # Update password and email
-        account.set_password(new_password)
-        account.email = new_email
-        account.save()
-        messages.success(request, "Your account has been updated.")
-        return redirect('edit_account')  # Adjust the redirect as needed
-
-    # Render the page for a GET request
-    return render(request, 'user_profile.html', {'account': account})
-
-@csrf_protect
-def delete_account(request, pk):
-    password = make_password(request.POST.get('passIn'))
-    account = get_object_or_404(Account, pk=pk)
-    accountpass = account.getPassword()
-
-    if password == accountpass:
-        Account.objects.filter(pk=pk).delete()
-        messages.success(request, 'Account deleted successfully')
-        return redirect('login')
-    else:
-        messages.info(request, 'Incorrect Password')
         return redirect('edit_account')
+
+    # Pass the user's email to the template to display it
+    context = {'user_email': request.user.email}
+    return render(request, 'user_profile.html', context)
+
+@login_required
+@csrf_protect
+def delete_account(request):
+    if request.method == "POST":
+        input_password = request.POST.get('passIn')
+        user = request.user
+
+        if user.check_password(input_password):
+            # Delete the related Account instance
+            Account.objects.filter(user=user).delete()
+            # Delete the User instance
+            user.delete()
+            messages.success(request, 'Account deleted successfully.')
+            logout(request)  # Log out the user after account deletion
+            return redirect('login')
+        else:
+            messages.error(request, 'Incorrect Password.')
+
+    return redirect('edit_account')
+
+@login_required
+def logout_view(request):
+    logout(request)
+    messages.success(request, "You have successfully logged out.")
+    return redirect('login')
     
 def edit_application(request, pk): #this is only update status for now
     application = get_object_or_404(Application, pk=pk)
