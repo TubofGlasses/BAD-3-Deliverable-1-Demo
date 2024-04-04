@@ -135,9 +135,20 @@ def create_account(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_pass = request.POST.get('Cpassword')
+        reg = '^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$'
+        pat = re.compile(reg)
+        mat = re.search(password, pat)
 
         # Additional validation and checks...
-
+        if password != confirm_pass:
+            messages.error(request, 'Passwords do not match.')
+            return redirect('create_account')
+        
+        if not mat:
+            messages.error(request, 'Invalid password.')
+            return redirect('create_account')
+        
+        
         # Assuming admin_pass check passes and other validations are ok
         try:
             # Create a User instance
