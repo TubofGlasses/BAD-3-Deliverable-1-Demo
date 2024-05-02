@@ -267,8 +267,11 @@ def logout_view(request):
 def edit_application(request, pk): #this is only update status for now
     application = get_object_or_404(Application, pk=pk)
     status = request.POST.get('status')
+    application.status = status
+    application.save()
+    appstatus = application.getStatus()
     
-    if status == 'Accepted' or status == 'Rejected':
+    if appstatus in ['Approved', 'Rejected', 'Expired']:
         first_name = application.getFirstName()
         last_name = application.getLastName()
         nationality = application.getNationality()
@@ -280,7 +283,7 @@ def edit_application(request, pk): #this is only update status for now
         expiration_date = application.getExpirationDateNoFormat()
         deadline = application.getDeadlineNoFormat()
         priority = application.getPriority()
-        new_archived = DeletedApplication(
+        new_archived = ApplicationArchive(
             firstName = first_name,
             lastName = last_name,
             nationality = nationality,
@@ -289,7 +292,7 @@ def edit_application(request, pk): #this is only update status for now
             applicationType = application_type,
             documentType = document_type,
             businessUnit = business_unit,
-            status = status,
+            status = appstatus,
             condition = 'Archived',
             expirationDate = expiration_date,
             deadline = deadline,
@@ -299,9 +302,6 @@ def edit_application(request, pk): #this is only update status for now
         Application.objects.filter(pk=pk).delete()
         
         return redirect('view_dashboard')
-        
-    application.status = status
-    application.save()
     
     return redirect('view_dashboard')
 
