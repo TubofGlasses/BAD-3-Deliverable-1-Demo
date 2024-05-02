@@ -267,7 +267,10 @@ def logout_view(request):
 def edit_application(request, pk): #this is only update status for now
     application = get_object_or_404(Application, pk=pk)
     status = request.POST.get('status')
+    additionalinfo = request.POST.get('additional info')
     application.status = status
+    currentcomment = application.getComment()
+    application.comment = currentcomment + " " + additionalinfo
     application.save()
     appstatus = application.getStatus()
     
