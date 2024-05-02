@@ -213,6 +213,10 @@ def create_account(request):
         if password != confirm_pass:
             messages.error(request, 'Passwords do not match.')
             return redirect('create_account')
+        
+        if Account.objects.filter(email=email).exists():
+            messages.error(request, 'Email address is already registered. Please input a different email address.')
+            return redirect('create account')
 
         # Placeholder for admin password validation
         if admin_pass != "admin_pass":  # Replace "admin_pass" with the actual admin password
