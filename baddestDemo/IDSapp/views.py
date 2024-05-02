@@ -81,6 +81,47 @@ def create_application(request):
     
     return render(request, 'create_application.html', context)
 
+def create_another(request):
+    if (request.method == "POST"):
+        first_name = request.POST.get('firstName')
+        last_name = request.POST.get('lastName')
+        nationality = request.POST.get('nationality')
+        company_pos = request.POST.get('position')
+        passport_no = request.POST.get('PassNo')
+        application_type = request.POST.get('AppType')
+        document_type = request.POST.get('docuType')
+        business_unit = request.POST.get('businessUnit')
+        status = 'In Progress'
+
+        expiration_date = None
+        if application_type == 'Renewal':
+            expiration_date = request.POST.get('expirationDate')
+            
+        if expiration_date:
+            expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
+
+        if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
+            messages.error(request, 'Application with this already exists.')
+            return redirect('create_application')
+        
+        new_application = Application(
+            firstName = first_name,
+            lastName = last_name,
+            nationality = nationality,
+            companyPos = company_pos,
+            passportNo = passport_no,
+            applicationType = application_type,
+            documentType = document_type,
+            businessUnit = business_unit,
+            status = status,
+            condition = 'Active',
+            expirationDate = expiration_date,  
+        )
+
+        new_application.save()
+        return redirect('create_application')
+    
+
 @csrf_protect
 def delete_selected(request):
     # This view will now enforce CSRF protection

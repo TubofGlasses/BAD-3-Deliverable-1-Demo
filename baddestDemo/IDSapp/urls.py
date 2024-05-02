@@ -8,6 +8,7 @@ urlpatterns = [
     path('checklist', views.view_checklist, name = 'view_checklist'),
     path('user_profile', views.edit_account, name = 'edit_account'),
     path('create_application', views.create_application, name = 'create_application'),
+    path('create_another', views.create_another, name = 'create_another'),
     path('delete_selected', views.delete_selected, name='delete_selected'),
     path('view_application/<int:pk>/', views.view_application, name='view_application'),
     path('login', views.login, name='login'),
