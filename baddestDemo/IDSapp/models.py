@@ -3,7 +3,11 @@ from django.conf import settings
 from datetime import timedelta, date
 
 # Create your models here.
-class Application(models.Model):
+class BaseApplication(models.Model):
+    
+    class Meta:
+        abstract = True
+        
     application_types = [
         ('Renewal', 'Renewal'),
         ('Application', 'Application')
@@ -115,7 +119,16 @@ class Application(models.Model):
         self.deadline = self.calculate_deadline()
         self.priority = self.calculate_priority()
 
-        super(Application, self).save(*args, **kwargs)
+        super(BaseApplication, self).save(*args, **kwargs)
+        
+class Application(BaseApplication):
+    pass
+
+class ApplicationArchive(BaseApplication):
+    pass
+
+class DeletedApplication(BaseApplication):
+    pass
 
 class Account(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

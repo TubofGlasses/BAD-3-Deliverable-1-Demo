@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Application, Account
+from .models import Application, ApplicationArchive, DeletedApplication, Account
 from django.core.paginator import Paginator
 from datetime import datetime
 from django.views.decorators.csrf import csrf_protect
@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+
 
 
 def view_dashboard(request):
@@ -234,3 +235,5 @@ def edit_application(request, pk): #this is only update status for now
     application.status = status
     application.save()
     return redirect('view_dashboard')
+
+
