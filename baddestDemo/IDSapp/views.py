@@ -232,8 +232,38 @@ def logout_view(request):
 def edit_application(request, pk): #this is only update status for now
     application = get_object_or_404(Application, pk=pk)
     status = request.POST.get('status')
+    
+    if status == 'Accepted' or status == 'Rejected':
+        first_name = application.getFirstName()
+        last_name = application.getLastName()
+        nationality = application.getNationality()
+        company_pos = application.getCompanyPos()
+        passport_no = application.getPassportNo()
+        application_type = application.getApplicationType()
+        document_type = application.getDocumentType()
+        business_unit = application.getBusinessUnit()
+        expiration_date = application.getExpirationDate()
+        new_archived = ApplicationArchive(
+            firstName = first_name,
+            lastName = last_name,
+            nationality = nationality,
+            companyPos = company_pos,
+            passportNo = passport_no,
+            applicationType = application_type,
+            documentType = document_type,
+            businessUnit = business_unit,
+            status = status,
+            condition = 'Archived',
+            expirationDate = expiration_date,
+        )
+        new_archived.save()
+        Application.objects.filter(pk=pk).delete()
+        
+        return redirect('view_dashboard')
+        
     application.status = status
     application.save()
+    
     return redirect('view_dashboard')
 
 
