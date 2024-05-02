@@ -181,11 +181,11 @@ from django.contrib.auth import authenticate, login as django_login
 
 def login(request):
     if request.method == "POST":
-        username = request.POST.get('username')
+        email = request.POST.get('email')
         raw_password = request.POST.get('password')
 
         # Authenticate the user using Django's system
-        user = authenticate(request, username=username, password=raw_password)
+        user = authenticate(request, email=email, password=raw_password)
         if user is not None:
             # User is authenticated, proceed to log them in
             django_login(request, user)
@@ -199,7 +199,7 @@ def login(request):
 def create_account(request):
     if request.method == "POST":
         admin_pass = request.POST.get('adminpass')
-        username = request.POST.get('username')
+        username = 'removed'
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_pass = request.POST.get('Cpassword')
