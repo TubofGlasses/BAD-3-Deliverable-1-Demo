@@ -86,8 +86,43 @@ def delete_selected(request):
     # This view will now enforce CSRF protection
     data = json.loads(request.body)
     ids_to_delete = data.get('ids', [])
+    
+    for i in ids_to_delete:
+        application = get_object_or_404(Application, pk=i)
+        first_name = application.getFirstName()
+        last_name = application.getLastName()
+        nationality = application.getNationality()
+        company_pos = application.getCompanyPos()
+        passport_no = application.getPassportNo()
+        application_type = application.getApplicationType()
+        document_type = application.getDocumentType()
+        business_unit = application.getBusinessUnit()
+        expiration_date = application.getExpirationDateNoFormat()
+        status = application.getStatus()
+        deadline = application.getDeadlineNoFormat()
+        priority = application.getPriority()
+        new_deleted = DeletedApplication(
+            firstName = first_name,
+            lastName = last_name,
+            nationality = nationality,
+            companyPos = company_pos,
+            passportNo = passport_no,
+            applicationType = application_type,
+            documentType = document_type,
+            businessUnit = business_unit,
+            status = status,
+            condition = 'Archived',
+            expirationDate = expiration_date,
+            deadline = deadline,
+            priority = priority,
+        )
+        new_deleted.save()
     Application.objects.filter(pk__in=ids_to_delete).delete()
     return JsonResponse({'status': 'success'}, status=200)
+
+    
+        
+        
 
 def view_application(request,pk): #add pk here 
     a = get_object_or_404(Application, pk=pk)
@@ -242,8 +277,10 @@ def edit_application(request, pk): #this is only update status for now
         application_type = application.getApplicationType()
         document_type = application.getDocumentType()
         business_unit = application.getBusinessUnit()
-        expiration_date = application.getExpirationDate()
-        new_archived = ApplicationArchive(
+        expiration_date = application.getExpirationDateNoFormat()
+        deadline = application.getDeadlineNoFormat()
+        priority = application.getPriority()
+        new_archived = DeletedApplication(
             firstName = first_name,
             lastName = last_name,
             nationality = nationality,
@@ -255,6 +292,8 @@ def edit_application(request, pk): #this is only update status for now
             status = status,
             condition = 'Archived',
             expirationDate = expiration_date,
+            deadline = deadline,
+            priority = priority,
         )
         new_archived.save()
         Application.objects.filter(pk=pk).delete()

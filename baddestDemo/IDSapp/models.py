@@ -69,6 +69,12 @@ class BaseApplication(models.Model):
     def getDeadline(self):
         return self.deadline.strftime('%m/%d/%Y') if self.deadline else None
     
+    def getExpirationDateNoFormat(self):
+        return self.expirationDate if self.expirationDate else None
+    
+    def getDeadlineNoFormat(self):
+        return self.deadline if self.deadline else None
+    
     def getStatus(self):
         return self.status
     
@@ -89,7 +95,8 @@ class BaseApplication(models.Model):
 
     def getPriority(self):
         return self.priority
-    
+        
+class Application(BaseApplication):
     def calculate_deadline(self):
         if self.applicationType == 'Renewal':
             if self.documentType in ['Visa', 'Passport']:
@@ -120,8 +127,6 @@ class BaseApplication(models.Model):
         self.priority = self.calculate_priority()
 
         super(BaseApplication, self).save(*args, **kwargs)
-        
-class Application(BaseApplication):
     pass
 
 class ApplicationArchive(BaseApplication):
