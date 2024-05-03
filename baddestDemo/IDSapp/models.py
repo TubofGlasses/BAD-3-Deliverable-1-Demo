@@ -33,7 +33,6 @@ class BaseApplication(models.Model):
     ]
 
     firstName = models.CharField(max_length = 50)
-    middleName = models.CharField(max_length = 50, blank=True, null=True)
     lastName = models.CharField(max_length = 50)
     nationality = models.CharField(max_length = 50)
     companyPos = models.CharField(max_length = 50)
@@ -51,9 +50,6 @@ class BaseApplication(models.Model):
 
     def getFirstName(self):
         return self.firstName
-    
-    def getMiddleName(self):
-        return self.middleName
     
     def getLastName(self):
         return self.lastName
