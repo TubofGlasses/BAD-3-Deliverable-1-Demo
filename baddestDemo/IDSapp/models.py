@@ -3,7 +3,11 @@ from django.conf import settings
 from datetime import timedelta, date
 
 # Create your models here.
-class Application(models.Model):
+class BaseApplication(models.Model):
+    
+    class Meta:
+        abstract = True
+        
     application_types = [
         ('Renewal', 'Renewal'),
         ('Application', 'Application')
@@ -69,6 +73,12 @@ class Application(models.Model):
     def getDeadline(self):
         return self.deadline.strftime('%m/%d/%Y') if self.deadline else None
     
+    def getExpirationDateNoFormat(self):
+        return self.expirationDate if self.expirationDate else None
+    
+    def getDeadlineNoFormat(self):
+        return self.deadline if self.deadline else None
+    
     def getStatus(self):
         return self.status
     
@@ -89,7 +99,8 @@ class Application(models.Model):
 
     def getPriority(self):
         return self.priority
-    
+        
+class Application(BaseApplication):
     def calculate_deadline(self):
         if self.applicationType == 'Renewal':
             if self.documentType in ['Visa', 'Passport']:
@@ -119,7 +130,14 @@ class Application(models.Model):
         self.deadline = self.calculate_deadline()
         self.priority = self.calculate_priority()
 
-        super(Application, self).save(*args, **kwargs)
+        super(BaseApplication, self).save(*args, **kwargs)
+    pass
+
+class ApplicationArchive(BaseApplication):
+    pass
+
+class DeletedApplication(BaseApplication):
+    pass
 
 class Account(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

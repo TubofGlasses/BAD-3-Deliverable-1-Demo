@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Application, Account, Checklist, ChecklistItem
+from .models import Application, ApplicationArchive, DeletedApplication, Account, Checklist, ChecklistItem
 from django.core.paginator import Paginator
 from datetime import datetime
 from django.views.decorators.csrf import csrf_protect
@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+
 
 
 def view_dashboard(request):
@@ -76,13 +77,89 @@ def create_application(request):
     
     return render(request, 'create_application.html', context)
 
+def create_another(request):
+    if (request.method == "POST"):
+        first_name = request.POST.get('firstName')
+        last_name = request.POST.get('lastName')
+        nationality = request.POST.get('nationality')
+        company_pos = request.POST.get('position')
+        passport_no = request.POST.get('PassNo')
+        application_type = request.POST.get('AppType')
+        document_type = request.POST.get('docuType')
+        business_unit = request.POST.get('businessUnit')
+        status = 'In Progress'
+
+        expiration_date = None
+        if application_type == 'Renewal':
+            expiration_date = request.POST.get('expirationDate')
+            
+        if expiration_date:
+            expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
+
+        if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
+            messages.error(request, 'Application with this already exists.')
+            return redirect('create_application')
+        
+        new_application = Application(
+            firstName = first_name,
+            lastName = last_name,
+            nationality = nationality,
+            companyPos = company_pos,
+            passportNo = passport_no,
+            applicationType = application_type,
+            documentType = document_type,
+            businessUnit = business_unit,
+            status = status,
+            condition = 'Active',
+            expirationDate = expiration_date,  
+        )
+
+        new_application.save()
+        return redirect('create_application')
+    
+
 @csrf_protect
 def delete_selected(request):
     # This view will now enforce CSRF protection
     data = json.loads(request.body)
     ids_to_delete = data.get('ids', [])
+    
+    for i in ids_to_delete:
+        application = get_object_or_404(Application, pk=i)
+        first_name = application.getFirstName()
+        last_name = application.getLastName()
+        nationality = application.getNationality()
+        company_pos = application.getCompanyPos()
+        passport_no = application.getPassportNo()
+        application_type = application.getApplicationType()
+        document_type = application.getDocumentType()
+        business_unit = application.getBusinessUnit()
+        expiration_date = application.getExpirationDateNoFormat()
+        status = application.getStatus()
+        deadline = application.getDeadlineNoFormat()
+        priority = application.getPriority()
+        new_deleted = DeletedApplication(
+            firstName = first_name,
+            lastName = last_name,
+            nationality = nationality,
+            companyPos = company_pos,
+            passportNo = passport_no,
+            applicationType = application_type,
+            documentType = document_type,
+            businessUnit = business_unit,
+            status = status,
+            condition = 'Archived',
+            expirationDate = expiration_date,
+            deadline = deadline,
+            priority = priority,
+        )
+        new_deleted.save()
     Application.objects.filter(pk__in=ids_to_delete).delete()
     return JsonResponse({'status': 'success'}, status=200)
+
+    
+        
+        
 
 def view_application(request,pk): #add pk here 
     a = get_object_or_404(Application, pk=pk)
@@ -100,11 +177,11 @@ from django.contrib.auth import authenticate, login as django_login
 
 def login(request):
     if request.method == "POST":
-        username = request.POST.get('username')
+        email = request.POST.get('email')
         raw_password = request.POST.get('password')
 
         # Authenticate the user using Django's system
-        user = authenticate(request, username=username, password=raw_password)
+        user = authenticate(request, email=email, password=raw_password)
         if user is not None:
             # User is authenticated, proceed to log them in
             django_login(request, user)
@@ -118,7 +195,7 @@ def login(request):
 def create_account(request):
     if request.method == "POST":
         admin_pass = request.POST.get('adminpass')
-        username = request.POST.get('username')
+        username = 'removed'
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_pass = request.POST.get('Cpassword')
@@ -132,6 +209,10 @@ def create_account(request):
         if password != confirm_pass:
             messages.error(request, 'Passwords do not match.')
             return redirect('create_account')
+        
+        if Account.objects.filter(email=email).exists():
+            messages.error(request, 'Email address is already registered. Please input a different email address.')
+            return redirect('create account')
 
         # Placeholder for admin password validation
         if admin_pass != "admin_pass":  # Replace "admin_pass" with the actual admin password
@@ -227,8 +308,46 @@ def logout_view(request):
 def edit_application(request, pk): #this is only update status for now
     application = get_object_or_404(Application, pk=pk)
     status = request.POST.get('status')
+    additionalinfo = request.POST.get('additional info')
     application.status = status
+    currentcomment = application.getComment()
+    application.comment = currentcomment + " " + additionalinfo
     application.save()
+    
+    appstatus = application.getStatus()
+    
+    if appstatus in ['Approved', 'Rejected', 'Expired']:
+        first_name = application.getFirstName()
+        last_name = application.getLastName()
+        nationality = application.getNationality()
+        company_pos = application.getCompanyPos()
+        passport_no = application.getPassportNo()
+        application_type = application.getApplicationType()
+        document_type = application.getDocumentType()
+        business_unit = application.getBusinessUnit()
+        expiration_date = application.getExpirationDateNoFormat()
+        deadline = application.getDeadlineNoFormat()
+        priority = application.getPriority()
+        new_archived = ApplicationArchive(
+            firstName = first_name,
+            lastName = last_name,
+            nationality = nationality,
+            companyPos = company_pos,
+            passportNo = passport_no,
+            applicationType = application_type,
+            documentType = document_type,
+            businessUnit = business_unit,
+            status = appstatus,
+            condition = 'Archived',
+            expirationDate = expiration_date,
+            deadline = deadline,
+            priority = priority,
+        )
+        new_archived.save()
+        Application.objects.filter(pk=pk).delete()
+        
+        return redirect('view_dashboard')
+    
     return redirect('view_dashboard')
 
 def view_checklist(request):
@@ -307,3 +426,5 @@ def update_checklist(request, checklist_id):
         return redirect('view_checklist')
 
     return render(request, 'update_checklist.html', {'checklist': checklist})
+
+
