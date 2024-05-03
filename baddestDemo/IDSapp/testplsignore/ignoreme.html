@@ -1,26 +1,55 @@
-<!--I'll use this to test lmao idk who made it but I'll use it-->
+document.addEventListener('DOMContentLoaded', function() {
+    var unsavedChangesAlert = document.getElementById('unsavedChangesAlert');
+    var emailButton = document.getElementById('emailButton');
+    var passwordButton = document.getElementById('passwordButton');
+    var resetChangesButton = document.getElementById('resetChanges');
 
-<script>
-    let input = document.getElementById("passIn");
-    let button = document.getElementById("confirmbutton");
-    button.disabled = true;
-    input.addEventListener("change", stateHandle);
-    
-    function stateHandle() {
-        if(input.value === "") {
-            button.disabled = true;
-        } else {
-            button.disabled = false;
-        };
+    var emailSectionOpen = false;
+    var passwordSectionOpen = false;
 
-    function on() {
-        document.getElementById("overlay").style.display = "block";
-        };
+    resetChangesButton.addEventListener('click', function() {
+        window.location.reload();
+    });
 
-    function off() {
-        document.getElementById("overlay").style.display = "none";
-        };
+    // Function to check if both sections are closed
+    function areBothSectionsClosed() {
+        return !emailSectionOpen && !passwordSectionOpen;
     }
-</script>
 
+    // Function to toggle the alert
+    function toggleAlert() {
+        if (areBothSectionsClosed()) {
+            unsavedChangesAlert.classList.add('hide-alert');
+            setTimeout(function() {
+                unsavedChangesAlert.classList.remove('show-alert', 'hide-alert');
+                unsavedChangesAlert.style.display = 'none';
+            }, 500);
+        } else {
+            unsavedChangesAlert.classList.add('show-alert');
+            unsavedChangesAlert.classList.remove('hide-alert');
+            unsavedChangesAlert.style.display = 'block';
+        }
+    }
 
+    // Event listener for the email edit button
+    emailButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        emailSectionOpen = !emailSectionOpen;
+        toggleAlert();
+    });
+
+    // Event listener for the password edit button
+    passwordButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        passwordSectionOpen = !passwordSectionOpen;
+        toggleAlert();
+    });
+
+    var form = document.querySelector('form');
+    form.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    document.addEventListener('click', function() {
+    }, true);
+});

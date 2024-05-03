@@ -29,6 +29,7 @@ class Application(models.Model):
     ]
 
     firstName = models.CharField(max_length = 50)
+    middleName = models.CharField(max_length = 50, blank=True, null=True)
     lastName = models.CharField(max_length = 50)
     nationality = models.CharField(max_length = 50)
     companyPos = models.CharField(max_length = 50)
@@ -46,6 +47,9 @@ class Application(models.Model):
 
     def getFirstName(self):
         return self.firstName
+    
+    def getMiddleName(self):
+        return self.middleName
     
     def getLastName(self):
         return self.lastName
@@ -132,3 +136,30 @@ class Account(models.Model):
     
     def getEmail(self):
         return self.email
+    
+class Checklist(models.Model):
+    document_types = [
+        ('Visa', 'Visa'),
+        ('Passport', 'Passport'),
+        ('Work Permit', 'Work Permit')
+    ]
+
+    name = models.CharField(max_length=255)
+    documentType = models.CharField(max_length = 20, choices = document_types, null=True)
+    country =  models.CharField(max_length = 50, null=True)
+
+    def getName(self):
+        return self.name
+    
+    def getDocumentType(self):
+        return self.documentType
+    
+    def getCountry(self):
+        return self.country
+
+class ChecklistItem(models.Model):
+    checklist = models.ForeignKey(Checklist, related_name='items', on_delete=models.CASCADE)
+    item = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.item

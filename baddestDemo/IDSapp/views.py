@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Application, Account
+from .models import Application, Account, Checklist, ChecklistItem
 from django.core.paginator import Paginator
 from datetime import datetime
 from django.views.decorators.csrf import csrf_protect
@@ -22,10 +22,6 @@ def view_dashboard(request):
     applications = paginator.get_page(page_number)
 
     return render(request, 'dashboard.html', {'applications': applications})
-
-def view_checklist(request):
-    application_objects = Application.objects.all()
-    return render(request, 'checklist.html', {'applications':application_objects})
 
 def view_profile(request):
     application_objects = Application.objects.all()
@@ -234,3 +230,80 @@ def edit_application(request, pk): #this is only update status for now
     application.status = status
     application.save()
     return redirect('view_dashboard')
+
+def view_checklist(request):
+    checklist_list = Checklist.objects.all()
+    paginator = Paginator(checklist_list, 7)  # Show 10 checklists per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'document_type_choices': Checklist.document_types,
+        'page_obj': page_obj,
+    }
+
+    return render(request, 'checklist.html', context)
+
+def create_checklist(request):
+    if request.method == 'POST':
+        Checklist.objects.create(name='Untitled Checklist')
+        return redirect('view_checklist')
+    return render(request, 'checklist.html', {'page_obj': Checklist.objects.all()})
+
+def add_checklist_item(request, checklist_id):
+    checklist = get_object_or_404(Checklist, id=checklist_id)
+    
+    if request.method == 'POST':
+        item_name = request.POST.get('item')
+        if item_name:
+            ChecklistItem.objects.create(checklist=checklist, item=item_name)
+    
+    return redirect('view_checklist')
+
+def update_checklist(request, checklist_id):
+    checklist = get_object_or_404(Checklist, id=checklist_id)
+
+    if request.method == 'POST':
+        checklist_name = request.POST.get('checklist_name', '')
+        docu_type = request.POST.get('docuType', '')
+        country = request.POST.get('country', '')
+        new_items_json = request.POST.get('newItemsArray', '[]')
+        new_items = json.loads(new_items_json)
+        item_values = request.POST.getlist('items[]')
+        items_to_delete = request.POST.getlist('delete_items[]')
+
+        print("Checklist Name:", checklist_name)
+        print("Document Type:", docu_type)
+        print("Country:", country)
+        print("Existing Items:", item_values)
+        print("Items to Delete:", items_to_delete)
+        print("New Items:", new_items)
+
+        # Update checklist name, doc type, and country
+        if checklist_name:
+            checklist.name = checklist_name
+        checklist.document_type = docu_type  # Assuming Checklist model has a `document_type` field
+        checklist.country = country  # Assuming Checklist model has a `country` field
+        checklist.save()
+
+        # Delete items by their database IDs
+        if items_to_delete:
+            ChecklistItem.objects.filter(id__in=items_to_delete).delete()
+
+        # Update existing items by their IDs
+        for item in checklist.items.all():
+            item_id = str(item.id)
+            if item_id in item_values:
+                item_name = request.POST.get(f'item_{item_id}')
+                if item_name:
+                    item.item = item_name
+                    item.save()
+
+        # Add new items
+        for new_item_name in new_items:
+            if new_item_name.strip():
+                ChecklistItem.objects.create(checklist=checklist, item=new_item_name)
+
+        return redirect('view_checklist')
+
+    return render(request, 'update_checklist.html', {'checklist': checklist})
