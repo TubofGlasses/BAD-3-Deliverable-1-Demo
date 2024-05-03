@@ -181,22 +181,22 @@ def login(request):
         raw_password = request.POST.get('password')
 
         # Authenticate the user using Django's system
-        user = authenticate(request, email=email, password=raw_password)
+        user = authenticate(request, username=email, password=raw_password)
         if user is not None:
             # User is authenticated, proceed to log them in
             django_login(request, user)
             return redirect('view_dashboard')
         else:
             # Authentication failed, handle login error
-            messages.error(request, 'Invalid username or password')
+            messages.error(request, 'Invalid email or password')
 
     return render(request, 'login.html')
 
 def create_account(request):
     if request.method == "POST":
         admin_pass = request.POST.get('adminpass')
-        username = 'removed'
         email = request.POST.get('email')
+        username = email
         password = request.POST.get('password')
         confirm_pass = request.POST.get('Cpassword')
         reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
@@ -212,7 +212,7 @@ def create_account(request):
         
         if Account.objects.filter(email=email).exists():
             messages.error(request, 'Email address is already registered. Please input a different email address.')
-            return redirect('create account')
+            return redirect('create_account')
 
         # Placeholder for admin password validation
         if admin_pass != "admin_pass":  # Replace "admin_pass" with the actual admin password

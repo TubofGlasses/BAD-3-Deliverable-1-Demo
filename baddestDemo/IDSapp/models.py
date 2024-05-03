@@ -137,7 +137,7 @@ class DeletedApplication(BaseApplication):
 
 class Account(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    username = models.CharField(max_length = 255)
+    username = models.CharField(max_length = 255, null=True)
     password = models.CharField(max_length = 255)
     email = models.EmailField(max_length = 254)
     objects = models.Manager()
