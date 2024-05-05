@@ -366,7 +366,7 @@ def view_checklist(request):
 def create_checklist(request):
     if request.method == 'POST':
         Checklist.objects.create(name='Untitled Checklist')
-        messages.success(request, 'Checklist created successfully!')
+        messages.success(request, 'Checklist created successfully. The checklist has been added into the system.')
         return redirect('view_checklist')
     return render(request, 'checklist.html', {'page_obj': Checklist.objects.all()})
 
@@ -388,6 +388,8 @@ def update_checklist(request, checklist_id):
         print("Existing Items:", item_values)
         print("Items to Delete:", items_to_delete)
         print("New Items:", new_items)
+
+        messages.success(request, 'Checklist updated successfully!')
 
         # Update checklist name, doc type, and country
         if checklist_name:
@@ -424,6 +426,7 @@ def delete_checklist(request, checklist_id):
     checklist = get_object_or_404(Checklist, id=checklist_id)
     if request.method == 'POST':
         checklist.delete()  # Deletes the checklist and associated items because of cascade delete
+        messages.error(request, 'Checklist deleted successfully.')
         return redirect('view_checklist')  # Adjust the redirect to your checklist view
 
 
