@@ -21,6 +21,8 @@ def view_dashboard(request):
 
     page_number = request.GET.get('page')
     applications = paginator.get_page(page_number)
+    
+    
 
     return render(request, 'dashboard.html', {'applications': applications})
 
@@ -167,9 +169,94 @@ def view_application(request,pk): #add pk here
     if request.method == 'POST':
         status = request.POST.get('status')
         a.status = status
+        additional_info = request.POST.get('additional_info', '').strip()
+        a.comment = additional_info
         a.save()
+        
+        #add notif here
+        
+        if status in ['Approved', 'Rejected', 'Expired']:
+            # Create an archive instance using the structure of your ApplicationArchive model
+            archived_app = ApplicationArchive(
+                firstName=a.firstName,
+                lastName=a.lastName,
+                nationality=a.nationality,
+                companyPos=a.companyPos,
+                passportNo=a.passportNo,
+                applicationType=a.applicationType,
+                documentType=a.documentType,
+                businessUnit=a.businessUnit,
+                status=a.status,
+                condition='Archived',  # Assuming your archive also uses 'condition'
+                comment=a.comment,
+                expirationDate=a.expirationDate,
+                deadline=a.deadline,
+                priority=a.priority
+            )
+            archived_app.save()
+
+            # Optionally delete the original application if that's the requirement
+            a.delete()
+
+            # Redirect to dashboard after processing
+            return redirect('view_dashboard')
+        
+        
         return redirect('view_dashboard')
-    return render(request, 'view_application.html',{'a':a})
+        
+    # Render page for GET request with the application instance
+    return render(request, 'view_application.html', {'a': a})
+
+def edit_application(request, pk): #this is only update status for now
+    application = get_object_or_404(Application, pk=pk)
+   
+    if request.method == "POST":
+        status = request.POST.get('status')
+        additionalinfo = request.POST.get('additional_info')
+        application.status = status
+        currentcomment = application.getComment()
+        application.comment = currentcomment + " " + additionalinfo
+        #application.save()
+        
+       
+        
+        appstatus = application.getStatus()
+        
+        if appstatus in ['Approved', 'Rejected', 'Expired']:
+            first_name = application.getFirstName()
+            last_name = application.getLastName()
+            nationality = application.getNationality()
+            company_pos = application.getCompanyPos()
+            passport_no = application.getPassportNo()
+            application_type = application.getApplicationType()
+            document_type = application.getDocumentType()
+            business_unit = application.getBusinessUnit()
+            expiration_date = application.getExpirationDateNoFormat()
+            deadline = application.getDeadlineNoFormat()
+            priority = application.getPriority()
+            new_archived = ApplicationArchive(
+                firstName = first_name,
+                lastName = last_name,
+                nationality = nationality,
+                companyPos = company_pos,
+                passportNo = passport_no,
+                applicationType = application_type,
+                documentType = document_type,
+                businessUnit = business_unit,
+                status = appstatus,
+                condition = 'Archived',
+                expirationDate = expiration_date,
+                deadline = deadline,
+                priority = priority,
+            )
+            new_archived.save()
+            Application.objects.filter(pk=pk).delete()
+            
+            
+            
+            return redirect('view_dashboard')
+    
+    return redirect('view_dashboard', 'view_application.html',{'a':a})
 
 
 
@@ -305,50 +392,7 @@ def logout_view(request):
     messages.success(request, "You have successfully logged out.")
     return redirect('login')
     
-def edit_application(request, pk): #this is only update status for now
-    application = get_object_or_404(Application, pk=pk)
-    status = request.POST.get('status')
-    additionalinfo = request.POST.get('additional info')
-    application.status = status
-    currentcomment = application.getComment()
-    application.comment = currentcomment + " " + additionalinfo
-    application.save()
-    
-    appstatus = application.getStatus()
-    
-    if appstatus in ['Approved', 'Rejected', 'Expired']:
-        first_name = application.getFirstName()
-        last_name = application.getLastName()
-        nationality = application.getNationality()
-        company_pos = application.getCompanyPos()
-        passport_no = application.getPassportNo()
-        application_type = application.getApplicationType()
-        document_type = application.getDocumentType()
-        business_unit = application.getBusinessUnit()
-        expiration_date = application.getExpirationDateNoFormat()
-        deadline = application.getDeadlineNoFormat()
-        priority = application.getPriority()
-        new_archived = ApplicationArchive(
-            firstName = first_name,
-            lastName = last_name,
-            nationality = nationality,
-            companyPos = company_pos,
-            passportNo = passport_no,
-            applicationType = application_type,
-            documentType = document_type,
-            businessUnit = business_unit,
-            status = appstatus,
-            condition = 'Archived',
-            expirationDate = expiration_date,
-            deadline = deadline,
-            priority = priority,
-        )
-        new_archived.save()
-        Application.objects.filter(pk=pk).delete()
-        
-        return redirect('view_dashboard')
-    
-    return redirect('view_dashboard')
+
 
 def view_checklist(request):
     checklist_list = Checklist.objects.all()

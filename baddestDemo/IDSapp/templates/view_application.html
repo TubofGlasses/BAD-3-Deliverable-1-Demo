@@ -372,12 +372,12 @@
             </div>
 
             <div id="AdditionalDetails" class="tabcontent" style="display: block;">
-                <textarea name="additional info" id="additional info" placeholder="Add details">{{a.getComment}}</textarea>
+                <textarea name="additional_info" id="additional_info" placeholder="Add details">{{ a.getComment }}</textarea>
                 <div class="button-container">
-                    <button>Submit</button>
-                </form>
+                    <button type='submit'>Submit</button>
                 </div>
             </div>
+            </form>
               
             <div id="History" class="tabcontent" style="display: none;">
             <!-- History content goes here -->
@@ -434,6 +434,8 @@
 {% endblock %}
 
 <!--TO DO
-- make it change color depending on the status
+- fix additional info
+- make pop ups appear
+- display checklist items
 
 -->
