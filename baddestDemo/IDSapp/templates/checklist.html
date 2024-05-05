@@ -25,9 +25,26 @@
             <h2 class="card-title mt-3" style="margin-left: 30px; margin-right: 30px; color: #0BB351; font-weight: bold; border-bottom: 3px solid #0BB351;">Checklists</h2>
         </div>
     </div>
+
     <div id="dynamicCard" class="card mt-4 flex-grow">
             <div class="container-fluid">
                 <div style="margin-left: 30px; margin-right: 30px;">
+
+                    <!-- Bootstrap Toast Message -->
+                    <div class="toast-container">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="d-flex">
+                                        <div class="toast-body">
+                                            {{ message }}
+                                        </div>
+                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
 
                     <table class="table table-hover mt-4">
                         <thead>
@@ -340,4 +357,16 @@
     {% endfor %}
 
 </script>
+
+<script>
+    // Initialize Bootstrap Toasts
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElements = document.querySelectorAll('.toast');
+        toastElements.forEach(function(toastEl) {
+            var toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 }); // Adjust delay as needed
+            toast.show();
+        });
+    });
+</script>
+
 {% endblock %}

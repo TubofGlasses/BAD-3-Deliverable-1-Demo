@@ -366,18 +366,9 @@ def view_checklist(request):
 def create_checklist(request):
     if request.method == 'POST':
         Checklist.objects.create(name='Untitled Checklist')
+        messages.success(request, 'Checklist created successfully!')
         return redirect('view_checklist')
     return render(request, 'checklist.html', {'page_obj': Checklist.objects.all()})
-
-def add_checklist_item(request, checklist_id):
-    checklist = get_object_or_404(Checklist, id=checklist_id)
-    
-    if request.method == 'POST':
-        item_name = request.POST.get('item')
-        if item_name:
-            ChecklistItem.objects.create(checklist=checklist, item=item_name)
-    
-    return redirect('view_checklist')
 
 def update_checklist(request, checklist_id):
     checklist = get_object_or_404(Checklist, id=checklist_id)
