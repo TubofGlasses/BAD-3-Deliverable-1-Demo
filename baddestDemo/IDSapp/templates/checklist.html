@@ -24,6 +24,10 @@
         right: 20px; /* Adjust as needed */
         z-index: 1050; /* Make sure the toast appears above other content */
     }
+
+    .toast {
+        margin-bottom: 15px; /* Add space between toasts */
+    }
 </style>
 
 <div class="flex-container">
@@ -41,26 +45,16 @@
                     <div class="toast-container">
                         {% if messages %}
                             {% for message in messages %}
-                                {% if message.tags == 'success' %}
-                                    <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                                        <div class="d-flex">
-                                            <div class="toast-body">
-                                                {{ message }}
-                                            </div>
-                                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                <div class="toast align-items-center text-white 
+                                    {% if message.tags == 'success' %}bg-success{% elif message.tags == 'error' %}bg-danger{% endif %}
+                                    border-0 my-2" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="d-flex">
+                                        <div class="toast-body">
+                                            {{ message }}
                                         </div>
+                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                                     </div>
-                                {% endif %}
-                                {% if message.tags == 'error' %}
-                                    <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                                        <div class="d-flex">
-                                            <div class="toast-body">
-                                                {{ message }}
-                                            </div>
-                                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                                        </div>
-                                    </div>
-                                {% endif %}
+                                </div>
                             {% endfor %}
                         {% endif %}
                     </div>
@@ -120,8 +114,7 @@
                                                     <div class="row">
                                                         <label for="docuType" class="col-form-label col-auto">Document Type</label>
                                                         <div class="col text-end">
-                                                            <select class="form-control d-inline-block" id="docuType{{ checklist.id }}" name="docuType"
-                                                                    style="border-radius: 10px; background-color: #fff; width: 200px; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' fill=\'%23000\' class=\'bi bi-caret-down-fill\' viewBox=\'0 0 16 16\'><path d=\'M7.247 11.14l-4.796-5.481A.5.5 0 0 1 2.5 5h10a.5.5 0 0 1 .372.842l-4.796 5.48a.5.5 0 0 1-.754 0z\'/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center;" disabled>
+                                                            <select class="form-control form-select d-inline-block" id="docuType{{ checklist.id }}" name="docuType" style="border-radius: 10px; background-color: #fff; width: 200px; appearance: none;" disabled>
                                                                 <option value="">Choose...</option>
                                                                 {% for value, display_text in document_type_choices %}
                                                                     <option value="{{ value }}" {% if value == checklist.documentType %}selected{% endif %}>{{ display_text }}</option>
@@ -133,8 +126,7 @@
                                                     <div class="row mt-3">
                                                         <label for="country" class="col-form-label col-auto">Country</label>
                                                         <div class="col text-end">
-                                                            <select id="country{{ checklist.id }}" name="country" class="form-control d-inline-block"
-                                                                    style="border-radius: 10px; background-color: #fff; width: 200px; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' fill=\'%23000\' class=\'bi bi-caret-down-fill\' viewBox=\'0 0 16 16\'><path d=\'M7.247 11.14l-4.796-5.481A.5.5 0 0 1 2.5 5h10a.5.5 0 0 1 .372.842l-4.796 5.48a.5.5 0 0 1-.754 0z\'/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center;" disabled>
+                                                            <select id="country{{ checklist.id }}" name="country" class="form-control form-select d-inline-block" style="border-radius: 10px; background-color: #fff; width: 200px; appearance: none;" disabled>
                                                                 <option value="">Country...</option>
                                                                 <!-- Country options will be added dynamically -->
                                                             </select>

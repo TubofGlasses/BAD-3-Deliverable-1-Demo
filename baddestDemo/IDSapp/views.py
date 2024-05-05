@@ -6,7 +6,7 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
-import re
+import regex as re
 from django.contrib.auth import login as django_login, update_session_auth_hash, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
@@ -47,9 +47,26 @@ def create_application(request):
         if expiration_date:
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
+        name_pattern = r"^[a-zA-Z\p{L}\s\.\-\']+$"
+
+        error_messages = []
+
+        # Check for special characters in first name and last name
+        if not re.match(name_pattern, first_name) or not re.match(name_pattern, last_name):
+            error_messages.append("Special characters are not allowed.")
+
+        # Check if the application already exists
         if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
-            messages.error(request, 'Application with this already exists.')
+            error_messages.append("Application with this already exists.")
+
+        # If there are any errors, display them and redirect
+        if error_messages:
+            for error in error_messages:
+                messages.error(request, error)
             return redirect('create_application')
+
+        # Your logic for successful creation goes here
+        messages.success(request, 'Application successfully created. The application has been added into the system.')
         
         new_application = Application(
             firstName = first_name,
@@ -96,9 +113,26 @@ def create_another(request):
         if expiration_date:
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
+        name_pattern = r"^[a-zA-Z\p{L}\s\.\-\']+$"
+
+        error_messages = []
+
+        # Check for special characters in first name and last name
+        if not re.match(name_pattern, first_name) or not re.match(name_pattern, last_name):
+            error_messages.append("Special characters are not allowed.")
+
+        # Check if the application already exists
         if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
-            messages.error(request, 'Application with this already exists.')
+            error_messages.append("Application with this already exists.")
+
+        # If there are any errors, display them and redirect
+        if error_messages:
+            for error in error_messages:
+                messages.error(request, error)
             return redirect('create_application')
+
+        # Your logic for successful creation goes here
+        messages.success(request, 'Application successfully created. The application has been added into the system.')
         
         new_application = Application(
             firstName = first_name,
@@ -242,26 +276,36 @@ def edit_account(request):
         current_password = request.POST.get('currentPassword')
         new_password = request.POST.get('newPassword')
         confirm_password = request.POST.get('confirmPassword')
-
-        password_check = request.user.check_password(current_password)
+        user = new_email
 
         user = request.user
         account = Account.objects.get(user=user)
 
         # Update email if it has changed
         if new_email and new_email != request.user.email:
-            request.user.email = new_email
-            account.email = new_email
-            request.user.save()
-            account.save()
-            messages.error(request, "Your email has been updated.")
+            if User.objects.filter(email=new_email).exists():
+                messages.error(request, "This email is already in use by another account.")
+            else:
+                request.user.email = new_email
+                account.email = new_email
+                request.user.username = new_email  # Assuming the username is based on the email
+                account.username = new_email
+                request.user.save()
+                account.save()
+                messages.success(request, "Your email has been updated.")
+        else:
+            messages.error(request, "Cannot use currently used email.")
 
         # Change password
         if current_password and new_password and confirm_password:
-            print("Current password (from form):", password_check)
-            print("Hashed password (from database):", request.user.password)
+            reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
+            pat = re.compile(reg)
+            mat = re.search(pat, new_password)
+
             if request.user.check_password(current_password):
-                if new_password == confirm_password:
+                if not mat:
+                    messages.error(request, 'Invalid Password.')
+                elif new_password == confirm_password:
                     request.user.password = make_password(new_password)
                     request.user.save()
                     account.password = request.user.check_password(new_password)
