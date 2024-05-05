@@ -401,8 +401,10 @@ def update_checklist(request, checklist_id):
         # Update checklist name, doc type, and country
         if checklist_name:
             checklist.name = checklist_name
-        checklist.document_type = docu_type  # Assuming Checklist model has a `document_type` field
-        checklist.country = country  # Assuming Checklist model has a `country` field
+        if docu_type:
+            checklist.documentType = docu_type  # Assuming Checklist model has a `document_type` field
+        if country:
+            checklist.country = country  # Assuming Checklist model has a `country` field
         checklist.save()
 
         # Delete items by their database IDs
@@ -426,5 +428,11 @@ def update_checklist(request, checklist_id):
         return redirect('view_checklist')
 
     return render(request, 'update_checklist.html', {'checklist': checklist})
+
+def delete_checklist(request, checklist_id):
+    checklist = get_object_or_404(Checklist, id=checklist_id)
+    if request.method == 'POST':
+        checklist.delete()  # Deletes the checklist and associated items because of cascade delete
+        return redirect('view_checklist')  # Adjust the redirect to your checklist view
 
 
