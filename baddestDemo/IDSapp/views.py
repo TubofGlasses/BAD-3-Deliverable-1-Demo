@@ -436,8 +436,7 @@ def email(request):
     for app in Application.objects.filter(priority=3): #if we can't implement real time updating of priority change this to manually get the days left
         subj = render_to_string('email-subject.html', {'app': app})
         cont = render_to_string('email-content.html', {'app': app})
-        user = request.user
-        acc = Account.objects.filter(user=user)
+        acc = Account.objects.all().values('email')
         useremails = acc.getEmail()
 
         Email = EmailMessage(
