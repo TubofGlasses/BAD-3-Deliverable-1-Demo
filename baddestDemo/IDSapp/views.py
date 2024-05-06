@@ -48,7 +48,7 @@ def create_application(request):
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
         if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
-            messages.error(request, 'Application already exists.')
+            messages.error(request, 'Application with this already exists.')
             return redirect('create_application')
         
         new_application = Application(
@@ -97,7 +97,7 @@ def create_another(request):
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
         if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
-            messages.error(request, 'Application already exists.')
+            messages.error(request, 'Application with this already exists.')
             return redirect('create_application')
         
         new_application = Application(
@@ -169,8 +169,7 @@ def view_application(request,pk): #add pk here
         a.status = status
         a.save()
         return redirect('view_dashboard')
-    apphist = a.history.all()
-    return render(request, 'view_application.html',{'a':a, 'ah':apphist})
+    return render(request, 'view_application.html',{'a':a})
 
 
 
@@ -228,7 +227,7 @@ def create_account(request):
             # Now you can create the Account instance with a reference to the User instance
             new_account = Account(user=user, username=username, email=email, password=make_password(password))
             new_account.save()
-            messages.info(request, 'Account created successfully. You may now log in to the system.')
+            messages.info(request, 'Account created successfully')
             return redirect('login')
         except IntegrityError as e:
             messages.error(request, 'There was a problem creating the account: ' + str(e))
@@ -255,7 +254,7 @@ def edit_account(request):
             account.email = new_email
             request.user.save()
             account.save()
-            messages.error(request, "Email address changed successfully. Your email has been updated.")
+            messages.error(request, "Your email has been updated.")
 
         # Change password
         if current_password and new_password and confirm_password:
@@ -263,19 +262,13 @@ def edit_account(request):
             print("Hashed password (from database):", request.user.password)
             if request.user.check_password(current_password):
                 if new_password == confirm_password:
-                    reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
-                    pat = re.compile(reg)
-                    mat = re.search(pat, password)
-                    if mat:
-                        request.user.password = make_password(new_password)
-                        request.user.save()
-                        account.password = request.user.check_password(new_password)
-                        account.save()
-                        # Keep the user logged in after changing the password
-                        update_session_auth_hash(request, request.user)
-                        messages.success(request, "Password changed successfully. Your password has been updated.")
-                    else:
-                        messages.error(request, 'Invalid Password')
+                    request.user.password = make_password(new_password)
+                    request.user.save()
+                    account.password = request.user.check_password(new_password)
+                    account.save()
+                    # Keep the user logged in after changing the password
+                    update_session_auth_hash(request, request.user)
+                    messages.success(request, "Your password has been updated.")
                 else:
                     messages.error(request, "New passwords do not match.")
             else:
@@ -434,22 +427,4 @@ def update_checklist(request, checklist_id):
 
     return render(request, 'update_checklist.html', {'checklist': checklist})
 
-from django.core.mail import EmailMessage
-from django.conf import settings
-from django.template.loader import render_to_string
 
-def email(request):
-    for app in Application.objects.filter(priority=3): #if we can't implement real time updating of priority change this to manually get the days left
-        subj = render_to_string('email-subject.html', {'app': app})
-        cont = render_to_string('email-content.html', {'app': app})
-        acc = Account.objects.all().values('email')
-        useremails = acc.getEmail()
-
-        Email = EmailMessage(
-            subj,
-            cont,
-            settings.EMAIL_HOST_USER,
-            useremails,
-        )
-
-        Email.send()
