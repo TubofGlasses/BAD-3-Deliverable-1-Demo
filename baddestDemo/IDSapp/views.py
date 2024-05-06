@@ -6,7 +6,7 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
-import regex as re
+import re
 from django.contrib.auth import login as django_login, update_session_auth_hash, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
@@ -47,26 +47,9 @@ def create_application(request):
         if expiration_date:
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
-        name_pattern = r"^[a-zA-Z\p{L}\s\.\-\']+$"
-
-        error_messages = []
-
-        # Check for special characters in first name and last name
-        if not re.match(name_pattern, first_name) or not re.match(name_pattern, last_name):
-            error_messages.append("Special characters are not allowed.")
-
-        # Check if the application already exists
         if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
-            error_messages.append("Application already exists.")
-
-        # If there are any errors, display them and redirect
-        if error_messages:
-            for error in error_messages:
-                messages.error(request, error)
+            messages.error(request, 'Application already exists.')
             return redirect('create_application')
-
-        # Your logic for successful creation goes here
-        messages.success(request, 'Application successfully created. The application has been added into the system.')
         
         new_application = Application(
             firstName = first_name,
@@ -113,26 +96,9 @@ def create_another(request):
         if expiration_date:
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
-        name_pattern = r"^[a-zA-Z\p{L}\s\.\-\']+$"
-
-        error_messages = []
-
-        # Check for special characters in first name and last name
-        if not re.match(name_pattern, first_name) or not re.match(name_pattern, last_name):
-            error_messages.append("Special characters are not allowed.")
-
-        # Check if the application already exists
         if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
-            error_messages.append("Application already exists.")
-
-        # If there are any errors, display them and redirect
-        if error_messages:
-            for error in error_messages:
-                messages.error(request, error)
+            messages.error(request, 'Application already exists.')
             return redirect('create_application')
-
-        # Your logic for successful creation goes here
-        messages.success(request, 'Application successfully created. The application has been added into the system.')
         
         new_application = Application(
             firstName = first_name,
@@ -277,37 +243,29 @@ def edit_account(request):
         current_password = request.POST.get('currentPassword')
         new_password = request.POST.get('newPassword')
         confirm_password = request.POST.get('confirmPassword')
-        user = new_email
+
+        password_check = request.user.check_password(current_password)
 
         user = request.user
         account = Account.objects.get(user=user)
 
         # Update email if it has changed
         if new_email and new_email != request.user.email:
-            if User.objects.filter(email=new_email).exists():
-                messages.error(request, "This email is already in use by another account.")
-            else:
-                request.user.email = new_email
-                account.email = new_email
-                request.user.username = new_email  # Assuming the username is based on the email
-                account.username = new_email
-                request.user.save()
-                account.save()
-                messages.success(request, "Your email has been updated.")
-        else:
-            messages.error(request, "Cannot use currently used email.")
+            request.user.email = new_email
+            account.email = new_email
+            request.user.save()
+            account.save()
+            messages.error(request, "Email address changed successfully. Your email has been updated.")
 
         # Change password
         if current_password and new_password and confirm_password:
-            reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
-            pat = re.compile(reg)
-            mat = re.search(pat, new_password)
-
+            print("Current password (from form):", password_check)
+            print("Hashed password (from database):", request.user.password)
             if request.user.check_password(current_password):
                 if new_password == confirm_password:
                     reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
                     pat = re.compile(reg)
-                    mat = re.search(pat, new_password)
+                    mat = re.search(pat, password)
                     if mat:
                         request.user.password = make_password(new_password)
                         request.user.save()
@@ -415,9 +373,18 @@ def view_checklist(request):
 def create_checklist(request):
     if request.method == 'POST':
         Checklist.objects.create(name='Untitled Checklist')
-        messages.success(request, 'Checklist created successfully. The checklist has been added into the system.')
         return redirect('view_checklist')
     return render(request, 'checklist.html', {'page_obj': Checklist.objects.all()})
+
+def add_checklist_item(request, checklist_id):
+    checklist = get_object_or_404(Checklist, id=checklist_id)
+    
+    if request.method == 'POST':
+        item_name = request.POST.get('item')
+        if item_name:
+            ChecklistItem.objects.create(checklist=checklist, item=item_name)
+    
+    return redirect('view_checklist')
 
 def update_checklist(request, checklist_id):
     checklist = get_object_or_404(Checklist, id=checklist_id)
@@ -438,15 +405,11 @@ def update_checklist(request, checklist_id):
         print("Items to Delete:", items_to_delete)
         print("New Items:", new_items)
 
-        messages.success(request, 'Checklist updated successfully!')
-
         # Update checklist name, doc type, and country
         if checklist_name:
             checklist.name = checklist_name
-        if docu_type:
-            checklist.documentType = docu_type  # Assuming Checklist model has a `document_type` field
-        if country:
-            checklist.country = country  # Assuming Checklist model has a `country` field
+        checklist.document_type = docu_type  # Assuming Checklist model has a `document_type` field
+        checklist.country = country  # Assuming Checklist model has a `country` field
         checklist.save()
 
         # Delete items by their database IDs
@@ -470,13 +433,6 @@ def update_checklist(request, checklist_id):
         return redirect('view_checklist')
 
     return render(request, 'update_checklist.html', {'checklist': checklist})
-
-def delete_checklist(request, checklist_id):
-    checklist = get_object_or_404(Checklist, id=checklist_id)
-    if request.method == 'POST':
-        checklist.delete()  # Deletes the checklist and associated items because of cascade delete
-        messages.error(request, 'Checklist deleted successfully.')
-        return redirect('view_checklist')  # Adjust the redirect to your checklist view
 
 from django.core.mail import EmailMessage
 from django.conf import settings
