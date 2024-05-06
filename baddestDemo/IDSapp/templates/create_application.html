@@ -2,6 +2,20 @@
 {% load static %}
 
 {% block content %}
+
+<style>
+    .toast-container {
+        position: fixed;
+        bottom: 20px; /* Adjust as needed */
+        right: 20px; /* Adjust as needed */
+        z-index: 1050; /* Make sure the toast appears above other content */
+    }
+
+    .toast {
+        margin-bottom: 15px; /* Add space between toasts */
+    }
+</style>
+
 <link rel="shortcut icon" type="image/png" href="{% static 'idslogo.png' %}" >
 <div style="padding-top: 20px; margin-left: 40px;">
     <div class="card" style="border: none; border-bottom-left-radius: 30px; border-top-left-radius: 30px;">
@@ -10,42 +24,71 @@
         </div>
     </div>
     <div id="dynamicCard" class="card mt-3" style="border: none; background: #e8f4ec; border-radius: 30px;">
+
+        <!-- Bootstrap Toast Message -->
+        <div class="toast-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="toast align-items-center text-white 
+                        {% if message.tags == 'success' %}bg-success{% elif message.tags == 'error' %}bg-danger{% endif %}
+                        border-0 my-2" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                {{ message }}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
         <!-- application creation form -->
         <form id="applicationForm" form method="POST" action="{% url 'create_application'%}" class="card mt-3 p-5" style="border: none; background: #e8f4ec; border-radius: 30px;"> {% csrf_token %}
             <div class="row">
                 <!-- column 1 -->
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="firstName">First Name and Middle Name<span class="required-asterisk">*</span></label>
+                        <label for="firstName">First Name<span class="required-asterisk">*</span></label>
                         <input type="text" id="firstName" name="firstName" class="form-control" style="border-radius: 10px; background-color: #fff;">
                     </div>
                     <div class="form-group">
+                        <label for="lastName">Last Name<span class="required-asterisk">*</span></label>
+                        <input type="text" id="lastName" name="lastName" class="form-control" style="border-radius: 10px; background-color: #fff; ">
+                    </div>
+                    <div class="form-group">
                         <label for="nationality">Nationality<span class="required-asterisk">*</span></label>
-                        <input type="text" id="nationality" name="nationality" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                        <select id="nationality" name="nationality" class="form-control form-select" style="border-radius: 10px; background-color: #fff;">
+                            <option value="">Choose...</option>
+                            <!-- Options will be dynamically added here -->
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="businessUnit">Business Unit<span class="required-asterisk">*</span></label>
                         <input type="text" id="businessUnit" name="businessUnit" class="form-control" style="border-radius: 10px; background-color: #fff;">
                     </div>
                     <div class="form-group">
-                        <label for="expirationDate">Expiration Date<span class="required-asterisk">*</span></label>
-                        <input type="date" id="expirationDate" name="expirationDate" class="form-control" style="border-radius: 10px; background-color: #fff; cursor: pointer;">
+                        <label for="position">Company Position<span class="required-asterisk">*</span></label>
+                        <input type="text" id="position" name="position" class="form-control" style="border-radius: 10px; background-color: #fff;">
                     </div>
-
                 </div>
                 <!-- column 2 -->
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="lastName">Last Name<span class="required-asterisk">*</span></label>
-                        <input type="text" id="lastName" name="lastName" class="form-control" style="border-radius: 10px; background-color: #fff; ">
+                        <label for="PassNo">Passport No.<span class="required-asterisk">*</span></label>
+                        <input type="text" id="PassNo" name="PassNo" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="position">Company Position<span class="required-asterisk">*</span></label>
-                        <input type="text" id="position" name="position" class="form-control" style="border-radius: 10px; background-color: #fff;">
+                        <label for="AppType">Application Type<span class="required-asterisk">*</span></label>
+                        <select class="form-control form-select" id="AppType" name="AppType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
+                            {% for value, display_text in application_type_choices %}
+                                <option value="{{ value }}">{{ display_text }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="docuType">Document Type<span class="required-asterisk">*</span></label>
-                        <select class="form-control" id="docuType" name="docuType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
+                        <select class="form-control form-select" id="docuType" name="docuType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
                             <option value="">Choose...</option>
                             {% for value, display_text in document_type_choices %}
                                 <option value="{{ value }}">{{ display_text }}</option>
@@ -53,25 +96,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="AppType">Application Type</label>
-                        <select class="form-control" id="AppType" name="AppType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
-                            {% for value, display_text in application_type_choices %}
-                                <option value="{{ value }}">{{ display_text }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="PassNo">Passport No.<span class="required-asterisk">*</span></label>
-                        <input type="text" id="PassNo" name="PassNo" class="form-control {% if messages %}highlight-error{% endif %}" 
-                            style="border-radius: 10px; background-color: #fff;" 
-                            {% for message in messages %}
-                                {% if message.tags == 'error' %}placeholder="{{ message }}"{% endif %}
-                            {% endfor %}
-                        >
+                        <label for="expirationDate">Expiration Date<span class="required-asterisk">*</span></label>
+                        <input type="date" id="expirationDate" name="expirationDate" class="form-control" style="border-radius: 10px; background-color: #fff; cursor: pointer;">
                     </div>
                 </div>
-            <div style="text-align: right;">
-            <button style="background: #109E4C; color: #ffffff; width: 20%; padding: 10px 20px; border-radius: 10px; margin-top: 20px; margin-right: 46px; text-align: center;" class="btn">Confirm</button>
+                <div style="text-align: right;">
+                    <button id="createAnotherButton" type="button" style="background: #109E4C; color: #ffffff; width: 20%; padding: 10px 20px; border-radius: 10px; margin-top: 20px; margin-right: 20px; text-align: center;" class="btn">Create Another</button>
+                    <button id="confirmButton" type="button" style="background: #109E4C; color: #ffffff; width: 20%; padding: 10px 20px; border-radius: 10px; margin-top: 20px; margin-right: 46px; text-align: center;" class="btn">Confirm</button>
+                </div>
             </div>
         </form>
     </div>
@@ -147,6 +179,54 @@
     // Call adjustCardHeight on window load and resize
     window.onload = adjustCardHeight;
     window.onresize = adjustCardHeight; 
+
+    async function fetchNationalities() {
+        const nationalitySelect = document.getElementById('nationality');
+        try {
+            const response = await fetch('https://restcountries.com/v3.1/all');
+            const countries = await response.json();
+            countries.sort((a, b) => a.name.common.localeCompare(b.name.common));
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.cca2; // Country code as value
+                option.text = country.name.common; // Country name
+                nationalitySelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error fetching nationalities:', error);
+            nationalitySelect.innerHTML = '<option value="">Error loading nationalities</option>';
+        }
+    }
+    
+    // Fetch nationalities when the page loads
+    document.addEventListener('DOMContentLoaded', fetchNationalities);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('applicationForm');
+        const createAnotherButton = document.getElementById('createAnotherButton');
+        const confirmButton = document.getElementById('confirmButton');
+    
+        createAnotherButton.addEventListener('click', function () {
+            form.action = "{% url 'create_another' %}";
+            form.submit();
+        });
+    
+        confirmButton.addEventListener('click', function () {
+            form.action = "{% url 'create_application' %}";
+            form.submit();
+        });
+    });
+</script>
+
+<script>
+    // Initialize Bootstrap Toasts
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElements = document.querySelectorAll('.toast');
+        toastElements.forEach(function(toastEl) {
+            var toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 }); // Adjust delay as needed
+            toast.show();
+        });
+    });
 </script>
 
 {% endblock %}
