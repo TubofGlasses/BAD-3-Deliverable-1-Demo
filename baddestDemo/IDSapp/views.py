@@ -97,7 +97,7 @@ def create_another(request):
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
         if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
-            messages.error(request, 'Application with this already exists.')
+            messages.error(request, 'Application already exists.')
             return redirect('create_application')
         
         new_application = Application(
@@ -255,7 +255,7 @@ def edit_account(request):
             account.email = new_email
             request.user.save()
             account.save()
-            messages.error(request, "Your email has been updated.")
+            messages.error(request, "Email address changed successfully. Your email has been updated.")
 
         # Change password
         if current_password and new_password and confirm_password:
@@ -263,13 +263,19 @@ def edit_account(request):
             print("Hashed password (from database):", request.user.password)
             if request.user.check_password(current_password):
                 if new_password == confirm_password:
-                    request.user.password = make_password(new_password)
-                    request.user.save()
-                    account.password = request.user.check_password(new_password)
-                    account.save()
-                    # Keep the user logged in after changing the password
-                    update_session_auth_hash(request, request.user)
-                    messages.success(request, "Your password has been updated.")
+                    reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
+                    pat = re.compile(reg)
+                    mat = re.search(pat, password)
+                    if mat:
+                        request.user.password = make_password(new_password)
+                        request.user.save()
+                        account.password = request.user.check_password(new_password)
+                        account.save()
+                        # Keep the user logged in after changing the password
+                        update_session_auth_hash(request, request.user)
+                        messages.success(request, "Password changed successfully. Your password has been updated.")
+                    else:
+                        messages.error(request, 'Invalid Password')
                 else:
                     messages.error(request, "New passwords do not match.")
             else:
