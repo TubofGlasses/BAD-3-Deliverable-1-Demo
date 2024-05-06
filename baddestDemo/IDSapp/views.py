@@ -237,21 +237,25 @@ def create_account(request):
         reg = "(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,}$"
         pat = re.compile(reg)
         mat = re.search(pat, password)
+
+        error_messages = []
         
         if not mat:
-            messages.error(request, 'Invalid Password')
-            return redirect('create_account')
+            error_messages.append('Invalid Password')
+
         if password != confirm_pass:
-            messages.error(request, 'Passwords do not match.')
-            return redirect('create_account')
+            error_messages.append('Passwords do not match.')
         
         if Account.objects.filter(email=email).exists():
-            messages.error(request, 'Email address is already registered. Please input a different email address.')
-            return redirect('create_account')
+            error_messages.append('Email address is already registered. Please input a different email address.')
 
         # Placeholder for admin password validation
         if admin_pass != "admin_pass":  # Replace "admin_pass" with the actual admin password
-            messages.error(request, 'Admin password provided is incorrect.')
+            error_messages.append('Admin password provided is incorrect.')
+
+        if error_messages:
+            for error in error_messages:
+                messages.error(request, error)
             return redirect('create_account')
         
         # Assuming admin_pass check passes and other validations are ok

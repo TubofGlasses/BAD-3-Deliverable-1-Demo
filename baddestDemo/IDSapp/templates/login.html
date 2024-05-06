@@ -1,3 +1,4 @@
+{% extends 'account_base.html' %}
 {% load static %}
 
 {% block content %}
@@ -28,7 +29,6 @@
         background-color: #0BB351;
         border-radius: 10px 0 0 10px; /* Round only the left corners */
         box-shadow: none; /* Remove shadow if not needed */
-        margin-bottom: 20px;
         padding: 20px;
         border-radius: 0 10px 10px 0; /* Only right side corners are rounded */
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -185,7 +185,17 @@
         border-radius: 5px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional */
     }
-    
+
+    .toast-container {
+        position: fixed;
+        bottom: 20px; /* Adjust as needed */
+        right: 20px; /* Adjust as needed */
+        z-index: 1050; /* Make sure the toast appears above other content */
+    }
+
+    .toast {
+        margin-bottom: 15px; /* Add space between toasts */
+    }
 </style>
 
 <div class="login-container">
@@ -193,6 +203,22 @@
       <img src="{% static 'idslogo.png' %}" alt="IDS Quality Training">
     </div>
 
+    <div class="toast-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast align-items-center text-white 
+                    {% if message.tags == 'success' %}bg-success{% elif message.tags == 'error' %}bg-danger{% endif %}
+                    border-0 my-2" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ message }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 
     <div class="form-section">
       <h2>Sign in</h2>
@@ -205,32 +231,22 @@
           <label for="password">Password</label>
           <input type="password" id="password" name="password">
         </div>
-        <button type="submit">Sign in</button>
+        <button type="submit" class="mb-3">Sign in</button>
       </form>
-        {% for message in messages %}
-            {% if message.tags == 'error' %}<font color='red'>{{ message }}</font>{% endif %}
-        {% endfor %}
       <p>Don’t have an account? <a href="{% url 'create_account' %}">Create an account</a></p>
-      {% for message in messages %}
-      {% if message.tags == 'success' %}
-              {{ message }}
-      {% endif %}
-  
-      {% if message.tags == 'info' %}
-          {{ message }}
-          <p><font color='green'>You may now log in to the system</font></p>
-      {% endif %}
     </div>
-
-
-
-    
-
-
-    {% endfor %}
 </div>
 
 
+<script>
+    // Initialize Bootstrap Toasts
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElements = document.querySelectorAll('.toast');
+        toastElements.forEach(function(toastEl) {
+            var toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 }); // Adjust delay as needed
+            toast.show();
+        });
+    });
+</script>
 
-   
 {% endblock %}
