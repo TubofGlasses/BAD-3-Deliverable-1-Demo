@@ -5,6 +5,33 @@ from auditlog.registry import auditlog
 from auditlog.models import AuditlogHistoryField
 
 # Create your models here.
+class Checklist(models.Model):
+    document_types = [
+        ('Visa', 'Visa'),
+        ('Passport', 'Passport'),
+        ('Work Permit', 'Work Permit')
+    ]
+
+    name = models.CharField(max_length=255)
+    documentType = models.CharField(max_length = 20, choices = document_types, null=True)
+    country =  models.CharField(max_length = 50, null=True)
+
+    def getName(self):
+        return self.name
+    
+    def getDocumentType(self):
+        return self.documentType
+    
+    def getCountry(self):
+        return self.country
+
+class ChecklistItem(models.Model):
+    checklist = models.ForeignKey(Checklist, related_name='items', on_delete=models.CASCADE)
+    item = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.item
+    
 class BaseApplication(models.Model):
     
     class Meta:
@@ -48,6 +75,7 @@ class BaseApplication(models.Model):
     condition = models.CharField(max_length = 20, choices = conditions)
     comment = models.TextField(blank=True, null=True)
     priority = models.IntegerField(default=0)
+    checklist = models.ForeignKey('Checklist', null=True, blank=True, on_delete=models.SET_NULL)
     objects = models.Manager()
 
     def getFirstName(self):
@@ -100,7 +128,8 @@ class BaseApplication(models.Model):
         
 class Application(BaseApplication):
     history = AuditlogHistoryField()
-    
+    checklist = models.ForeignKey(Checklist, null=True, blank=True, on_delete=models.SET_NULL)
+
     def calculate_deadline(self):
         if self.applicationType == 'Renewal':
             if self.documentType in ['Visa', 'Passport']:
@@ -156,30 +185,3 @@ class Account(models.Model):
     
     def getEmail(self):
         return self.email
-    
-class Checklist(models.Model):
-    document_types = [
-        ('Visa', 'Visa'),
-        ('Passport', 'Passport'),
-        ('Work Permit', 'Work Permit')
-    ]
-
-    name = models.CharField(max_length=255)
-    documentType = models.CharField(max_length = 20, choices = document_types, null=True)
-    country =  models.CharField(max_length = 50, null=True)
-
-    def getName(self):
-        return self.name
-    
-    def getDocumentType(self):
-        return self.documentType
-    
-    def getCountry(self):
-        return self.country
-
-class ChecklistItem(models.Model):
-    checklist = models.ForeignKey(Checklist, related_name='items', on_delete=models.CASCADE)
-    item = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.item

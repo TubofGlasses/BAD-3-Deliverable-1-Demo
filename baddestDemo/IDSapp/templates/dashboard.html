@@ -176,7 +176,7 @@
                         <td><a href="{% url 'view_application' pk=a.pk %}" class="row-link"><input type="checkbox" class="row-checkbox form-check-input" value="{{ a.pk }}"></a></td>
                         <td><a href="{% url 'view_application' pk=a.pk %}" class="row-link"><span style="font-weight: bold;">{{ a.pk }}</span></a></td>
                         <td><a href="{% url 'view_application' pk=a.pk %}" class="row-link">{{ a.getFirstName }} {{ a.getLastName }}</a></td>
-                        <td><a href="{% url 'view_application' pk=a.pk %}" class="row-link"> {{ a.getNationality }} </a></td>
+                        <td><a href="{% url 'view_application' pk=a.pk %}" class="row-link">{{ a.country_name }}</a></td>
                         <td><a href="{% url 'view_application' pk=a.pk %}" class="row-link"> {{ a.getCompanyPos }} </a></td>
                         <td><a href="{% url 'view_application' pk=a.pk %}" class="row-link"> {{ a.getBusinessUnit }} </a></td>
                         <td><a href="{% url 'view_application' pk=a.pk %}" class="row-link"><span style="border-radius: 14px; background: #FFFADC; font-weight: bold; padding-left: 15px; padding-right: 15px; padding-top: 3px; padding-bottom: 3px;">{{ a.getDocumentType }}</span></a></td>

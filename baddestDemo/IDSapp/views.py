@@ -7,21 +7,34 @@ from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
 import re
+import requests
 from django.contrib.auth import login as django_login, update_session_auth_hash, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 
-
+def fetch_country_name_mapping():
+    url = 'https://restcountries.com/v3.1/all'
+    response = requests.get(url)
+    country_data = response.json()
+    
+    # Create a dictionary mapping country codes (cca2) to country names
+    code_to_name = {country['cca2']: country['name']['common'] for country in country_data}
+    return code_to_name
 
 def view_dashboard(request):
     application_list = Application.objects.all().order_by('-priority', 'deadline')
-    paginator = Paginator(application_list, 10)  # Show 20 applications per page.
-
+    country_name_map = fetch_country_name_mapping()
+    
+    # Map country code to country name
+    for application in application_list:
+        application.country_name = country_name_map.get(application.nationality, application.nationality)
+    
+    paginator = Paginator(application_list, 10)  # Show 10 applications per page
     page_number = request.GET.get('page')
     applications = paginator.get_page(page_number)
-
+    
     return render(request, 'dashboard.html', {'applications': applications})
 
 def view_profile(request):
@@ -190,25 +203,30 @@ def delete_selected(request):
         new_deleted.save()
     Application.objects.filter(pk__in=ids_to_delete).delete()
     return JsonResponse({'status': 'success'}, status=200)
-
-    
-        
         
 
-def view_application(request,pk): 
+def view_application(request, pk): 
     a = get_object_or_404(Application, pk=pk)
     checklist = Checklist.objects.filter(documentType=a.documentType, country=a.nationality).first()
+    checklists = Checklist.objects.all()
     if checklist:
         checklist_items = ChecklistItem.objects.filter(checklist=checklist)
     else:
         checklist_items = []
+
+    # Fetch the country code to name mapping
+    code_to_name = fetch_country_name_mapping()
+    a.nationality = code_to_name.get(a.nationality, a.nationality)
+
     if request.method == 'POST':
         status = request.POST.get('status')
         a.status = status
         additionalinfo = request.POST.get('additional info')
+        checklist_id = request.POST.get('checklist')
+        a.checklist_id = checklist_id
         a.comment = additionalinfo
         a.save()
-        
+
         if status in ['Approved', 'Rejected', 'Expired']:
             archived_app = ApplicationArchive(
                 firstName=a.firstName,
@@ -228,15 +246,14 @@ def view_application(request,pk):
             )
             archived_app.save()
             a.delete()
-            
+
             return redirect('view_dashboard')
         return redirect('view_dashboard')
-    
+
     apphist = a.history.all()
-    
-    
-    return render(request, 'view_application.html',{'a':a, 'ah':apphist,'checklist': checklist,
-        'checklist_items': checklist_items })
+
+    return render(request, 'view_application.html', {'a': a, 'ah': apphist, 'checklist': checklist,
+                                                     'checklist_items': checklist_items, 'checklists': checklists})
 
 def edit_application(request, pk): #this is only update status for now
     application = get_object_or_404(Application, pk=pk)
