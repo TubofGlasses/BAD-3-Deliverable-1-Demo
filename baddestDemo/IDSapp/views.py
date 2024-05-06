@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
 import regex as re
+import re
 from django.contrib.auth import login as django_login, update_session_auth_hash, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
@@ -195,17 +196,87 @@ def delete_selected(request):
         
         
 
-def view_application(request,pk): #add pk here 
+def view_application(request,pk): 
     a = get_object_or_404(Application, pk=pk)
-    
     if request.method == 'POST':
         status = request.POST.get('status')
         a.status = status
+        additionalinfo = request.POST.get('additional info')
+        a.comment = additionalinfo
         a.save()
+        
+        if status in ['Approved', 'Rejected', 'Expired']:
+            archived_app = ApplicationArchive(
+                firstName=a.firstName,
+                lastName=a.lastName,
+                nationality=a.nationality,
+                companyPos=a.companyPos,
+                passportNo=a.passportNo,
+                applicationType=a.applicationType,
+                documentType=a.documentType,
+                businessUnit=a.businessUnit,
+                status=a.status,
+                condition='Archived',  
+                comment=a.comment,
+                expirationDate=a.expirationDate,
+                deadline=a.deadline,
+                priority=a.priority
+            )
+            archived_app.save()
+            a.delete()
+            
+            return redirect('view_dashboard')
         return redirect('view_dashboard')
+    
     apphist = a.history.all()
-    return render(request, 'view_application.html',{'a':a, 'ah':apphist})
+    
+    
+    return render(request, 'view_application.html',{'a':a, 'ah':apphist,})
 
+def edit_application(request, pk): #this is only update status for now
+    application = get_object_or_404(Application, pk=pk)
+    status = request.POST.get('status')
+    additionalinfo = request.POST.get('additional info')
+    application.status = status
+    currentcomment = application.getComment()
+    application.comment = currentcomment + " " + additionalinfo
+    application.save()
+    
+    appstatus = application.getStatus()
+    
+    if appstatus in ['Approved', 'Rejected', 'Expired']:
+        first_name = application.getFirstName()
+        last_name = application.getLastName()
+        nationality = application.getNationality()
+        company_pos = application.getCompanyPos()
+        passport_no = application.getPassportNo()
+        application_type = application.getApplicationType()
+        document_type = application.getDocumentType()
+        business_unit = application.getBusinessUnit()
+        expiration_date = application.getExpirationDateNoFormat()
+        deadline = application.getDeadlineNoFormat()
+        priority = application.getPriority()
+        new_archived = ApplicationArchive(
+            firstName = first_name,
+            lastName = last_name,
+            nationality = nationality,
+            companyPos = company_pos,
+            passportNo = passport_no,
+            applicationType = application_type,
+            documentType = document_type,
+            businessUnit = business_unit,
+            status = appstatus,
+            condition = 'Archived',
+            expirationDate = expiration_date,
+            deadline = deadline,
+            priority = priority,
+        )
+        new_archived.save()
+        Application.objects.filter(pk=pk).delete()
+        
+        return redirect('view_dashboard')
+    
+    return redirect('view_dashboard')
 
 
 from django.contrib.auth import authenticate, login as django_login
@@ -358,50 +429,7 @@ def logout_view(request):
     messages.success(request, "You have successfully logged out.")
     return redirect('login')
     
-def edit_application(request, pk): #this is only update status for now
-    application = get_object_or_404(Application, pk=pk)
-    status = request.POST.get('status')
-    additionalinfo = request.POST.get('additional info')
-    application.status = status
-    currentcomment = application.getComment()
-    application.comment = currentcomment + " " + additionalinfo
-    application.save()
-    
-    appstatus = application.getStatus()
-    
-    if appstatus in ['Approved', 'Rejected', 'Expired']:
-        first_name = application.getFirstName()
-        last_name = application.getLastName()
-        nationality = application.getNationality()
-        company_pos = application.getCompanyPos()
-        passport_no = application.getPassportNo()
-        application_type = application.getApplicationType()
-        document_type = application.getDocumentType()
-        business_unit = application.getBusinessUnit()
-        expiration_date = application.getExpirationDateNoFormat()
-        deadline = application.getDeadlineNoFormat()
-        priority = application.getPriority()
-        new_archived = ApplicationArchive(
-            firstName = first_name,
-            lastName = last_name,
-            nationality = nationality,
-            companyPos = company_pos,
-            passportNo = passport_no,
-            applicationType = application_type,
-            documentType = document_type,
-            businessUnit = business_unit,
-            status = appstatus,
-            condition = 'Archived',
-            expirationDate = expiration_date,
-            deadline = deadline,
-            priority = priority,
-        )
-        new_archived.save()
-        Application.objects.filter(pk=pk).delete()
-        
-        return redirect('view_dashboard')
-    
-    return redirect('view_dashboard')
+
 
 def view_checklist(request):
     checklist_list = Checklist.objects.all()
