@@ -1,2 +1,3 @@
 
 django/pyvenv.cfg
+*.cfg
