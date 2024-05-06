@@ -409,15 +409,21 @@
             
             <div id="Checklist" class="tabcontent" style="display: none;">
                 <div class="tab-content" id="checklist-tab">
+                    {% if checklist %}
                     <div class="container">
                         <div class="header">
-                            <h2>{{}}</h2> <!--add checklist header here-->
+                            <h2>{{checklist.getName}}</h2> <!--add checklist header here-->
                         </div>
                         <!--<div class=''>
-                            <h3> Document Type: {{a.getDocumentType}}  Country: {{a.getCountry}} <h3>
+                            <h3> Document Type: {{a.getDocumentType}}  Country: {{a.getNationality}} <h3>
                         </div>-->
                         <div class="requirement-list">
-                            <ul class="list-group list-group-flush">
+                            <ul>
+                                
+                                    {% for item in checklist_items %}
+                                        <li>{{ item.item }}</li>
+                                    {% endfor %}
+                                
                             
                             </ul>
                             
@@ -425,7 +431,7 @@
                          
                                                         
                         </div>
-        
+                    {% endif %}
                     </div>
                   </div>
             </div>

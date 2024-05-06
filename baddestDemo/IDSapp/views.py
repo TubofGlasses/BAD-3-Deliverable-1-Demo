@@ -6,7 +6,6 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
-import regex as re
 import re
 from django.contrib.auth import login as django_login, update_session_auth_hash, logout
 from django.contrib.auth.models import User
@@ -48,7 +47,7 @@ def create_application(request):
         if expiration_date:
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
-        name_pattern = r"^[a-zA-Z\p{L}\s\.\-\']+$"
+        name_pattern = r"^[a-zA-Z\\p{L}\s\.\-\']+$"
 
         error_messages = []
 
@@ -198,6 +197,11 @@ def delete_selected(request):
 
 def view_application(request,pk): 
     a = get_object_or_404(Application, pk=pk)
+    checklist = Checklist.objects.filter(documentType=a.documentType, country=a.nationality).first()
+    if checklist:
+        checklist_items = ChecklistItem.objects.filter(checklist=checklist)
+    else:
+        checklist_items = []
     if request.method == 'POST':
         status = request.POST.get('status')
         a.status = status
@@ -231,7 +235,8 @@ def view_application(request,pk):
     apphist = a.history.all()
     
     
-    return render(request, 'view_application.html',{'a':a, 'ah':apphist,})
+    return render(request, 'view_application.html',{'a':a, 'ah':apphist,'checklist': checklist,
+        'checklist_items': checklist_items })
 
 def edit_application(request, pk): #this is only update status for now
     application = get_object_or_404(Application, pk=pk)
