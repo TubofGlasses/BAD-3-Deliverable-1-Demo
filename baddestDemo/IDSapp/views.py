@@ -169,7 +169,8 @@ def view_application(request,pk): #add pk here
         a.status = status
         a.save()
         return redirect('view_dashboard')
-    return render(request, 'view_application.html',{'a':a})
+    apphist = a.history.all()
+    return render(request, 'view_application.html',{'a':a, 'ah':apphist})
 
 
 
