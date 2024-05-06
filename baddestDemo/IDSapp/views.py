@@ -48,7 +48,7 @@ def create_application(request):
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
         if Application.objects.filter(passportNo=passport_no, documentType=document_type).exists():
-            messages.error(request, 'Application with this already exists.')
+            messages.error(request, 'Application already exists.')
             return redirect('create_application')
         
         new_application = Application(
@@ -228,7 +228,7 @@ def create_account(request):
             # Now you can create the Account instance with a reference to the User instance
             new_account = Account(user=user, username=username, email=email, password=make_password(password))
             new_account.save()
-            messages.info(request, 'Account created successfully')
+            messages.info(request, 'Account created successfully. You may now log in to the system.')
             return redirect('login')
         except IntegrityError as e:
             messages.error(request, 'There was a problem creating the account: ' + str(e))
