@@ -432,19 +432,19 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.template.loader import render_to_string
 
-def email(request, pk):
-    app = get_object_or_404(Application, pk=pk)
-    subj = render_to_string('email-subject.html', {'app': app})
-    cont = render_to_string('email-content.html', {'app': app})
-    user = request.user
-    acc = Account.objects.filter(user=user)
-    useremails = acc.getEmail()
+def email(request):
+    for app in Application.objects.filter(priority=3): #if we can't implement real time updating of priority change this to manually get the days left
+        subj = render_to_string('email-subject.html', {'app': app})
+        cont = render_to_string('email-content.html', {'app': app})
+        user = request.user
+        acc = Account.objects.filter(user=user)
+        useremails = acc.getEmail()
 
-    Email = EmailMessage(
-        subj,
-        cont,
-        settings.EMAIL_HOST_USER,
-        useremails,
-    )
+        Email = EmailMessage(
+            subj,
+            cont,
+            settings.EMAIL_HOST_USER,
+            useremails,
+        )
 
-    Email.send()
+        Email.send()
