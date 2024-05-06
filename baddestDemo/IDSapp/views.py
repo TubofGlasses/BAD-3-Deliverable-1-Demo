@@ -428,4 +428,23 @@ def update_checklist(request, checklist_id):
 
     return render(request, 'update_checklist.html', {'checklist': checklist})
 
+from django.core.mail import EmailMessage
+from django.conf import settings
+from django.template.loader import render_to_string
 
+def email(request, pk):
+    app = get_object_or_404(Application, pk=pk)
+    subj = render_to_string('email-subject.html', {'app': app})
+    cont = render_to_string('email-content.html', {'app': app})
+    user = request.user
+    acc = Account.objects.filter(user=user)
+    useremails = acc.getEmail()
+
+    Email = EmailMessage(
+        subj,
+        cont,
+        settings.EMAIL_HOST_USER,
+        useremails,
+    )
+
+    Email.send()
