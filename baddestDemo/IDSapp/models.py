@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from datetime import timedelta, date
+from auditlog.registry import auditlog
+from auditlog.models import AuditlogHistoryField
 
 # Create your models here.
 class BaseApplication(models.Model):
@@ -97,6 +99,8 @@ class BaseApplication(models.Model):
         return self.priority
         
 class Application(BaseApplication):
+    history = AuditlogHistoryField()
+    
     def calculate_deadline(self):
         if self.applicationType == 'Renewal':
             if self.documentType in ['Visa', 'Passport']:
@@ -128,6 +132,8 @@ class Application(BaseApplication):
 
         super(BaseApplication, self).save(*args, **kwargs)
     pass
+
+auditlog.register(Application)
 
 class ApplicationArchive(BaseApplication):
     pass
