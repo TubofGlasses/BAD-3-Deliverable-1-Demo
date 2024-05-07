@@ -67,6 +67,7 @@ def view_dashboard(request):
                     deadline=application.deadline,
                     priority=application.priority
                 )
+                messages.warning(request, "Application archived.")
                 archived_app.save()
                 application.delete()
                 
@@ -371,7 +372,7 @@ def view_application(request, pk):
             messages.error(request, f"Error updating application: {str(e)}")
             return redirect('view_application', pk=a.pk)
 
-        if status in ['Approved', 'Rejected', 'Archived']:
+        if status in ['Approved', 'Rejected', 'Expired']:
             archived_app = ApplicationArchive(
                 firstName=a.firstName,
                 lastName=a.lastName,
@@ -388,6 +389,7 @@ def view_application(request, pk):
                 deadline=a.deadline,
                 priority=a.priority
             )
+            messages.warning(request, "Application archived.")
             archived_app.save()
             a.delete()
 
@@ -437,6 +439,7 @@ def edit_application(request, pk): #this is only update status for now
             deadline = deadline,
             priority = priority,
         )
+        messages.warning(request, "Application archived.")
         new_archived.save()
         Application.objects.filter(pk=pk).delete()
         
