@@ -253,13 +253,13 @@
         
                     <!-- Email Input -->
                     <div id="emailInputRow" class="row" style="display: none;">
-                        <form method="post" action="{% url 'edit_account'%}">
-                        {% csrf_token %}
+                        <form method="post" action="{% url 'edit_account'%}" id="emailForm">
+                            {% csrf_token %}
                             <div class="row">
-                                <input type="email" class="form-control mt-4" id="email" name="newEmail" placeholder="Enter new email address" style="margin-left: 12px; margin-bottom: 20px; width: 400px">
+                                <input type="email" class="form-control mt-4" id="emailInput" name="newEmail" placeholder="Enter new email address" style="margin-left: 12px; margin-bottom: 20px; width: 400px">
                             </div>
                             <div class="row">
-                                <button type="submit" id="saveChanges" class="btn btn-sm" style="background: #08873d; color: #fff; border-radius: 10px; width: 120px; margin-left: 10px;">Save Changes</button>
+                                <button type="submit" id="emailSaveButton" class="btn btn-sm" style="background: #08873d; color: #fff; border-radius: 10px; width: 120px; margin-left: 10px;" disabled>Save Changes</button>
                             </div>
                         </form>
                     </div>
@@ -278,21 +278,21 @@
                         </div>
                     </div>
                     <div id="passwordInputRow" class="row" style="display: none;">
-                        <form method="post" action="{% url 'edit_account'%}">
+                        <form method="post" action="{% url 'edit_account'%}" id="passwordForm">
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col-auto">
-                                    <input type="password" class="form-control mt-4" id="currentPassword" name="currentPassword" placeholder="Current Password" style="margin-bottom: 20px; width: 300px">
+                                    <input type="password" class="form-control mt-4" id="currentPasswordInput" name="currentPassword" placeholder="Current Password" style="margin-bottom: 20px; width: 300px">
                                 </div>
                                 <div class="col-auto">
-                                    <input type="password" class="form-control mt-4" id="newPassword" name="newPassword" placeholder="New Password" style="margin-bottom: 20px; width: 300px">
+                                    <input type="password" class="form-control mt-4" id="newPasswordInput" name="newPassword" placeholder="New Password" style="margin-bottom: 20px; width: 300px">
                                 </div>
                                 <div class="col-auto">
-                                    <input type="password" class="form-control mt-4" id="confirmPassword" name="confirmPassword" placeholder="Confirm New Password" style="margin-bottom: 20px; width: 300px">
+                                    <input type="password" class="form-control mt-4" id="confirmPasswordInput" name="confirmPassword" placeholder="Confirm New Password" style="margin-bottom: 20px; width: 300px">
                                 </div>
                             </div>
                             <div class="row">
-                                <button type="submit" id="saveChanges" class="btn btn-sm" style="background: #08873d; color: #fff; border-radius: 10px; width: 120px; margin-left: 10px;">Save Changes</button>
+                                <button type="submit" id="passwordSaveButton" class="btn btn-sm" style="background: #08873d; color: #fff; border-radius: 10px; width: 120px; margin-left: 10px;" disabled>Save Changes</button>
                             </div>
                         </form>
                     </div>
@@ -412,6 +412,31 @@
             document.getElementById("overlay").style.display = "none";
         };
     
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Email Form
+        var emailInput = document.getElementById('emailInput');
+        var emailSaveButton = document.getElementById('emailSaveButton');
+    
+        emailInput.addEventListener('input', function() {
+            emailSaveButton.disabled = !emailInput.value.trim();
+        });
+    
+        // Password Form
+        var currentPasswordInput = document.getElementById('currentPasswordInput');
+        var newPasswordInput = document.getElementById('newPasswordInput');
+        var confirmPasswordInput = document.getElementById('confirmPasswordInput');
+        var passwordSaveButton = document.getElementById('passwordSaveButton');
+    
+        function checkPasswordForm() {
+            var isFilled = currentPasswordInput.value.trim() && newPasswordInput.value.trim() && confirmPasswordInput.value.trim();
+            passwordSaveButton.disabled = !isFilled;
+        }
+    
+        currentPasswordInput.addEventListener('input', checkPasswordForm);
+        newPasswordInput.addEventListener('input', checkPasswordForm);
+        confirmPasswordInput.addEventListener('input', checkPasswordForm);
     });
 </script>
 

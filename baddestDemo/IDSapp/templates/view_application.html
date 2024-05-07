@@ -388,21 +388,23 @@
                             <th>From</th>
                             <th>To</th>
                             <th>Date</th>
+                            <th>User</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for e in ah %}  
-                        {% for key, value in e.changes_dict.items %}
-                        <tr>
-                            <td>{{ key }}</td>
-                            <td>{{ value.0|default:"None" }}</td>
-                            <td>{{ value.1|default:"None" }}</td>
-                            <td>{{ e.timestamp }}</td>
-                        </tr>
-                        {% endfor %}
-                        {% empty %}
-                        <p>No history for this item has been logged yet.</p>
-                        {% endfor %}
+                            {% for e in ah %}
+                                {% for key, value in e.changes_dict.items %}
+                                    <tr>
+                                        <td>{{ key }}</td>
+                                        <td>{{ value.0|default:"None" }}</td>
+                                        <td>{{ value.1|default:"None" }}</td>
+                                        <td>{{ e.timestamp }}</td>
+                                        <td>{{ e.history_user.username|default:"System" }}</td> <!-- Add this line -->
+                                    </tr>
+                                {% endfor %}
+                                {% empty %}
+                                <p>No history for this item has been logged yet.</p>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>

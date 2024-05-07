@@ -353,11 +353,10 @@ def view_application(request, pk):
 
     if request.method == 'POST':
         status = request.POST.get('status')
-        if not status:  # Ensure status is not empty
-            status = 'In Progress'  # Assign a default value
+        if not status:
+            status = 'In Progress'
         
         a.status = status
-        
         additionalinfo = request.POST.get('additional info')
         a.comment = additionalinfo
 
@@ -503,7 +502,7 @@ def create_account(request):
             # Now you can create the Account instance with a reference to the User instance
             new_account = Account(user=user, username=username, email=email, password=make_password(password))
             new_account.save()
-            messages.info(request, 'Account created successfully. You may now log in to the system.')
+            messages.success(request, 'Account created successfully. You may now log in to the system.')
             return redirect('login')
         except IntegrityError as e:
             messages.error(request, 'There was a problem creating the account: ' + str(e))
