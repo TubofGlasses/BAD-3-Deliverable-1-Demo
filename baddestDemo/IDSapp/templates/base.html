@@ -46,9 +46,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'view_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'view_dashboard' %}active{% endif %}">
-                    <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
-                    Dashboard
+                    <a href="{% url 'view_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'view_dashboard' or request.resolver_match.url_name == 'filter' %}active{% endif %}">
+                        <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
+                        Dashboard
                     </a>
                 </li>
                 <li>
