@@ -158,16 +158,16 @@
         <div class="row mt-4" style="margin-left: 20px; margin-right: 20px;">
             <!-- Left buttons -->
             <div class="col-6 d-flex justify-content-start">
-                <a href="#" class="filter-btn filter-all">
+                <a href="{% url 'filter' value=0 %}" class="btn d-flex align-items-center justify-content-center me-2" style="border-radius: 15px; background: #8D8AFF; color: #ffffff; box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.20);">
                     <span style="margin-right: 5px;">All</span>
                     <p class="filter-count">0</p>
                 </a>
                
-                <a href="#" class="filter-btn filter-in-progress">
+                <a href="{% url 'filter' value=1 %}" class="filter-btn filter-in-progress">
                     <span style="margin-right: 5px;">In Progress</span>
                     <p class="filter-count">35</p>
                 </a>
-                <a href="#" class="filter-btn filter-lodged">
+                <a href="{% url 'filter' value=2 %}" class="filter-btn filter-lodged">
                     <span style="margin-right: 5px;">Lodged</span>
                     <p class="filter-count">3</p>
                 </a>
