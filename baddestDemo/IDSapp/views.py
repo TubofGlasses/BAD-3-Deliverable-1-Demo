@@ -32,8 +32,14 @@ def view_dashboard(request):
     total_applications = Application.objects.count()
     in_progress_count = Application.objects.filter(status='In Progress').count()
     lodged_count = Application.objects.filter(status='Lodged').count()
-    
+
     application_list = Application.objects.all().order_by('-priority', 'deadline')
+    country_name_map = fetch_country_name_mapping()
+    
+    # Map country code to country name
+    for application in application_list:
+        application.country_name = country_name_map.get(application.nationality, application.nationality)
+
     paginator = Paginator(application_list, 10)  # Show 10 applications per page
     page_number = request.GET.get('page')
     applications = paginator.get_page(page_number)
@@ -43,9 +49,9 @@ def view_dashboard(request):
         'total_applications': total_applications,
         'in_progress_count': in_progress_count,
         'lodged_count': lodged_count,
-        'selected_filter': '0',  # You can set this to '0' by default
+        'selected_filter': '0',  # Default filter
     }
-    
+
     return render(request, 'dashboard.html', context)
 
 def view_profile(request):
