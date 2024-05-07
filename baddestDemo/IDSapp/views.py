@@ -121,6 +121,22 @@ def create_application(request):
         )
 
         new_application.save()
+
+        if new_application.getPriority() == 3:
+            subj = render_to_string('email-subject.html', {'app': new_application})
+            cont = render_to_string('email-content.html', {'app': new_application})
+            acc = Account.objects.all().values('email')
+            useremails = list(acc)
+
+            Email = EmailMessage(
+                subj,
+                cont,
+                settings.EMAIL_HOST_USER,
+                useremails,
+            )
+
+            Email.send()
+
         return redirect('view_dashboard')
     
     context = {
@@ -201,7 +217,23 @@ def create_another(request):
         )
 
         new_application.save()
-        return redirect('create_application')
+
+        if new_application.getPriority() == 3:
+            subj = render_to_string('email-subject.html', {'app': new_application})
+            cont = render_to_string('email-content.html', {'app': new_application})
+            acc = Account.objects.all().values('email')
+            useremails = list(acc)
+
+            Email = EmailMessage(
+                subj,
+                cont,
+                settings.EMAIL_HOST_USER,
+                useremails,
+            )
+
+            Email.send()
+
+        return redirect('view_dashboard')
     
     context = {
         'status_choices': Application.statuses,
@@ -625,11 +657,11 @@ from django.conf import settings
 from django.template.loader import render_to_string
 
 def email(request):
-    for app in Application.objects.filter(priority=3): #if we can't implement real time updating of priority change this to manually get the days left
+    for app in Application.objects.filter(priority=3): 
         subj = render_to_string('email-subject.html', {'app': app})
         cont = render_to_string('email-content.html', {'app': app})
         acc = Account.objects.all().values('email')
-        useremails = acc.getEmail()
+        useremails = list(acc)
 
         Email = EmailMessage(
             subj,
