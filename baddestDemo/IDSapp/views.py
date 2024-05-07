@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Application, ApplicationArchive, DeletedApplication, Account, Checklist, ChecklistItem
 from django.core.paginator import Paginator
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
@@ -35,6 +35,20 @@ def view_dashboard(request):
 
     application_list = Application.objects.all().order_by('-priority', 'deadline')
     country_name_map = fetch_country_name_mapping()
+
+    today = date.today()
+    for application in application_list:
+        application.country_name = country_name_map.get(application.nationality, application.nationality)
+        
+        if application.deadline:
+            days_until_deadline = (application.deadline - today).days
+            
+            # Add blank statements based on the deadline conditions
+            if days_until_deadline < 7:
+                print("Urgent Email Sent")
+            elif days_until_deadline < 30:
+                print("Notification Email Sent")
+
     
     # Map country code to country name
     for application in application_list:
@@ -175,10 +189,17 @@ def create_another(request):
 
         expiration_date = None
         if application_type == 'Renewal':
-            expiration_date = request.POST.get('expirationDate')
-            
-        if expiration_date:
-            expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
+            expiration_date_str = request.POST.get('expirationDate')
+            try:
+                expiration_date = datetime.strptime(expiration_date_str, '%Y-%m-%d').date()
+                today = datetime.today().date()
+                next_week = today + timedelta(weeks=1)
+                
+                if expiration_date <= today or expiration_date < next_week:
+                    raise ValueError("Expiration date must be at least one week from today.")
+            except (ValueError, TypeError):
+                messages.error(request, 'Invalid expiration date. Please select a valid date.')
+                return redirect('create_application')
 
         name_pattern = r"^[a-zA-Z\\p{L}\s\.\-\']+$"
 
@@ -199,7 +220,7 @@ def create_another(request):
             return redirect('create_application')
         
         checklist = None
-        if document_type in ['Work Permit', 'Visa']:
+        if document_type in ['Visa', 'Work Permit']:
             checklist = Checklist.objects.filter(documentType=document_type).first()
             print(f"Assigned checklist for {document_type}: {checklist}")
         elif document_type == 'Passport':
@@ -246,7 +267,7 @@ def create_another(request):
 
             Email.send()
 
-        return redirect('view_dashboard')
+        return redirect('create_application')
     
     context = {
         'status_choices': Application.statuses,
