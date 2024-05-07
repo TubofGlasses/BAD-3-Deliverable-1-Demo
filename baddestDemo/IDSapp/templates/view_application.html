@@ -290,6 +290,34 @@
         font-size: 16px; 
         color: black; 
     }
+
+    .green-square-bullet {
+        list-style: none; /* Remove default bullet */
+        position: relative; /* Required for the pseudo-element to be positioned properly */
+      }
+    
+    .green-square-bullet::before {
+    content: "■"; /* Unicode square symbol */
+    color: #0BB351; /* Green color */
+    position: absolute; /* Position it relative to the list item */
+    left: -1.5em; /* Adjust spacing as needed */
+    font-size: 0.8em; /* Adjust size as needed */
+    }
+
+    .separated-list {
+        list-style: none; /* Remove default bullets */
+        padding: 0; /* Remove default padding */
+        margin: 0; /* Remove default margin */
+    }
+
+    .separated-list li {
+        padding: 10px 0; /* Adjust the padding as needed */
+        border-bottom: 2px solid #ddd; /* Light gray border */
+    }
+
+    .separated-list li:last-child {
+        border-bottom: none; /* Remove the border from the last item */
+    }
   </style>
 
 <div class="container">
@@ -416,29 +444,34 @@
                     <!-- Checklist Dropdown -->
                     <form method="POST" action="{% url 'view_application' a.pk %}">
                         {% csrf_token %}
-                        <label for="checklist-select">Assign Checklist:</label>
-                        <select id="checklist-select" name="checklist">
-                            {% for cl in checklists %}
-                                <option value="{{ cl.id }}" {% if cl == a.checklist %}selected{% endif %}>
-                                    {{ cl.getName }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit" style="margin-left: 10px;">Assign</button>
+                        <div class="row align-items-center" style="margin-left: 65px;">
+                            <div class="col-auto">
+                                <select id="checklist-select" name="checklist" class="form-select">
+                                    {% for cl in checklists %}
+                                        <option value="{{ cl.id }}" {% if cl == a.checklist %}selected{% endif %}>
+                                            {{ cl.getName }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary" style="margin-left: 5px; height: 35px; font-size: 14px; line-height: 35px; padding: 0 15px;">Assign</button>
+                            </div>
+                        </div>
                     </form>
                     
                     <!-- Display Checklist Details -->
                     {% if a.checklist %}
                         <div class="container mt-3">
-                            <div class="header">
-                                <h2>{{ a.checklist.getName }}</h2> <!-- Add checklist header here -->
+                            <div class="header mb-3">
+                                <h2 style="color: #0BB351;">{{ a.checklist.getName }}</h2> <!-- Add checklist header here -->
                             </div>
-                            <div class="requirement-list">
-                                <ul>
+                            <div class="requirement-list" style="margin-left: 50px; margin-right: 50px;">
+                                <ul class="separated-list">
                                     {% for item in a.checklist.items.all %}
-                                        <li>{{ item.item }}</li>
+                                        <li class="mb-2 green-square-bullet">{{ item.item }}</li>
                                     {% endfor %}
-                                </ul>
+                                  </ul>
                             </div>
                         </div>
                     {% else %}

@@ -334,6 +334,7 @@ def delete_selected(request):
         )
         new_deleted.save()
     Application.objects.filter(pk__in=ids_to_delete).delete()
+    messages.error(request, 'Application deletion successful.')
     return JsonResponse({'status': 'success'}, status=200)
         
 
