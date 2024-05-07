@@ -42,17 +42,36 @@ def view_dashboard(request):
         
         if application.deadline:
             days_until_deadline = (application.deadline - today).days
+
+            # Check for expired applications
+            if application.deadline < today:
+                application.deadline = application.expirationDate
+
+            if application.expirationDate < today:
+                # Update status to 'Archived' and archive the application
+                archived_app = ApplicationArchive(
+                    firstName=application.firstName,
+                    lastName=application.lastName,
+                    nationality=application.nationality,
+                    companyPos=application.companyPos,
+                    passportNo=application.passportNo,
+                    applicationType=application.applicationType,
+                    documentType=application.documentType,
+                    businessUnit=application.businessUnit,
+                    status='Archived',
+                    condition='Archived',
+                    expirationDate=application.expirationDate,
+                    deadline=application.deadline,
+                    priority=application.priority
+                )
+                archived_app.save()
+                application.delete()
             
             # Add blank statements based on the deadline conditions
-            if days_until_deadline < 7:
-                print("Urgent Email Sent")
+            elif days_until_deadline < 7:
+                application.blank_statement = "Urgent action required"
             elif days_until_deadline < 30:
-                print("Notification Email Sent")
-
-    
-    # Map country code to country name
-    for application in application_list:
-        application.country_name = country_name_map.get(application.nationality, application.nationality)
+                application.blank_statement = "Action required soon"
 
     paginator = Paginator(application_list, 10)  # Show 10 applications per page
     page_number = request.GET.get('page')
@@ -67,10 +86,6 @@ def view_dashboard(request):
     }
 
     return render(request, 'dashboard.html', context)
-
-def view_profile(request):
-    application_objects = Application.objects.all()
-    return render(request, 'user_profile.html', {'applications':application_objects})
 
 def create_application(request):
     if (request.method == "POST"):
@@ -353,7 +368,7 @@ def view_application(request, pk):
             messages.error(request, f"Error updating application: {str(e)}")
             return redirect('view_application', pk=a.pk)
 
-        if status in ['Approved', 'Rejected', 'Expired']:
+        if status in ['Approved', 'Rejected', 'Archived']:
             archived_app = ApplicationArchive(
                 firstName=a.firstName,
                 lastName=a.lastName,
@@ -506,19 +521,20 @@ def edit_account(request):
         account = Account.objects.get(user=user)
 
         # Update email if it has changed
-        if new_email and new_email != request.user.email:
-            if User.objects.filter(email=new_email).exists():
-                messages.error(request, "This email is already in use by another account.")
+        if new_email:
+            if new_email != request.user.email:
+                if User.objects.filter(email=new_email).exists():
+                    messages.error(request, "This email is already in use by another account.")
+                else:
+                    request.user.email = new_email
+                    account.email = new_email
+                    request.user.username = new_email  # Assuming the username is based on the email
+                    account.username = new_email
+                    request.user.save()
+                    account.save()
+                    messages.success(request, "Your email has been updated.")
             else:
-                request.user.email = new_email
-                account.email = new_email
-                request.user.username = new_email  # Assuming the username is based on the email
-                account.username = new_email
-                request.user.save()
-                account.save()
-                messages.success(request, "Your email has been updated.")
-        else:
-            messages.error(request, "Cannot use currently used email.")
+                messages.error(request, "Cannot use currently used email.")
 
         # Change password
         if current_password and new_password and confirm_password:
