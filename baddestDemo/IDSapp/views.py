@@ -13,29 +13,35 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+from django.core.cache import cache
 
 def fetch_country_name_mapping():
+    cached_data = cache.get('country_name_map')
+    if cached_data:
+        return cached_data
+
     url = 'https://restcountries.com/v3.1/all'
     response = requests.get(url)
     country_data = response.json()
-    
-    # Create a dictionary mapping country codes (cca2) to country names
     code_to_name = {country['cca2']: country['name']['common'] for country in country_data}
+    cache.set('country_name_map', code_to_name, timeout=86400)  # Cache for a day
     return code_to_name
 
 def view_dashboard(request):
     application_list = Application.objects.all().order_by('-priority', 'deadline')
     country_name_map = fetch_country_name_mapping()
-    
-    # Map country code to country name
+
     for application in application_list:
         application.country_name = country_name_map.get(application.nationality, application.nationality)
-    
-    paginator = Paginator(application_list, 10)  # Show 10 applications per page
+
+    paginator = Paginator(application_list, 10)
     page_number = request.GET.get('page')
     applications = paginator.get_page(page_number)
-    
-    return render(request, 'dashboard.html', {'applications': applications})
+
+    return render(request, 'dashboard.html', {
+        'applications': applications,
+        'selected_filter': '0'  # Default to '0' for the "All" filter
+    })
 
 def view_profile(request):
     application_objects = Application.objects.all()
@@ -580,18 +586,26 @@ def email(request):
         Email.send()
 
 def filter(request, value):
+    application_list = None
     if value == '0':
         return redirect('view_dashboard')
     elif value == '1':
-        application_list = Application.objects.filter(status = 'In Progress').order_by('-priority', 'deadline')
+        application_list = Application.objects.filter(status='In Progress').order_by('-priority', 'deadline')
+    elif value == '2':
+        application_list = Application.objects.filter(status='Lodged').order_by('-priority', 'deadline')
+
+    if application_list is not None:
         country_name_map = fetch_country_name_mapping()
-        
-        # Map country code to country name
         for application in application_list:
             application.country_name = country_name_map.get(application.nationality, application.nationality)
-        
-        paginator = Paginator(application_list, 10)  # Show 10 applications per page
+
+        paginator = Paginator(application_list, 10)
         page_number = request.GET.get('page')
         applications = paginator.get_page(page_number)
-        
-        return render(request, 'dashboard.html', {'applications': applications})
+
+        return render(request, 'dashboard.html', {
+            'applications': applications,
+            'selected_filter': value
+        })
+
+    return redirect('view_dashboard')
