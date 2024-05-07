@@ -47,6 +47,9 @@ def view_dashboard(request):
             if application.deadline < today:
                 application.deadline = application.expirationDate
 
+            if application.expirationDate is None:
+                application.expirationDate = application.deadline
+
             if application.expirationDate < today:
                 # Update status to 'Archived' and archive the application
                 archived_app = ApplicationArchive(
@@ -66,12 +69,12 @@ def view_dashboard(request):
                 )
                 archived_app.save()
                 application.delete()
-            
+                
             # Add blank statements based on the deadline conditions
             elif days_until_deadline < 7:
-                application.blank_statement = "Urgent action required"
+                print("Urgent action required")
             elif days_until_deadline < 30:
-                application.blank_statement = "Action required soon"
+                print("Action required soon")
 
     paginator = Paginator(application_list, 10)  # Show 10 applications per page
     page_number = request.GET.get('page')
