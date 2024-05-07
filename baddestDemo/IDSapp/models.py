@@ -65,7 +65,7 @@ class BaseApplication(models.Model):
     lastName = models.CharField(max_length = 50)
     nationality = models.CharField(max_length = 50)
     companyPos = models.CharField(max_length = 50)
-    passportNo = models.CharField(max_length = 15)
+    passportNo = models.CharField(max_length = 15, blank=True, null=True)
     expirationDate = models.DateField(blank=True, null=True)
     deadline = models.DateField(blank=True, null=True)
     status = models.CharField(max_length = 20, choices = statuses)

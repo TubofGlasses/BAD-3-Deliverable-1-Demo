@@ -160,15 +160,15 @@
             <div class="col-6 d-flex justify-content-start">
                 <a href="{% url 'filter' value=0 %}" class="filter-btn filter-all {% if selected_filter == '0' %}selected{% endif %}">
                     <span style="margin-right: 5px;">All</span>
-                    <p class="filter-count">0</p>
+                    <p class="filter-count">{{ total_applications }}</p>
                 </a>
                 <a href="{% url 'filter' value=1 %}" class="filter-btn filter-in-progress {% if selected_filter == '1' %}selected{% endif %}">
                     <span style="margin-right: 5px;">In Progress</span>
-                    <p class="filter-count">35</p>
+                    <p class="filter-count">{{ in_progress_count }}</p>
                 </a>
                 <a href="{% url 'filter' value=2 %}" class="filter-btn filter-lodged {% if selected_filter == '2' %}selected{% endif %}">
                     <span style="margin-right: 5px;">Lodged</span>
-                    <p class="filter-count">3</p>
+                    <p class="filter-count">{{ lodged_count }}</p>
                 </a>
             </div>
             <!-- Right buttons -->

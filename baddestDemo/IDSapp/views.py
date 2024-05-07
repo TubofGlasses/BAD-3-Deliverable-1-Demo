@@ -28,20 +28,25 @@ def fetch_country_name_mapping():
     return code_to_name
 
 def view_dashboard(request):
+    # Count applications by their status
+    total_applications = Application.objects.count()
+    in_progress_count = Application.objects.filter(status='In Progress').count()
+    lodged_count = Application.objects.filter(status='Lodged').count()
+    
     application_list = Application.objects.all().order_by('-priority', 'deadline')
-    country_name_map = fetch_country_name_mapping()
-
-    for application in application_list:
-        application.country_name = country_name_map.get(application.nationality, application.nationality)
-
-    paginator = Paginator(application_list, 10)
+    paginator = Paginator(application_list, 10)  # Show 10 applications per page
     page_number = request.GET.get('page')
     applications = paginator.get_page(page_number)
-
-    return render(request, 'dashboard.html', {
+    
+    context = {
         'applications': applications,
-        'selected_filter': '0'  # Default to '0' for the "All" filter
-    })
+        'total_applications': total_applications,
+        'in_progress_count': in_progress_count,
+        'lodged_count': lodged_count,
+        'selected_filter': '0',  # You can set this to '0' by default
+    }
+    
+    return render(request, 'dashboard.html', context)
 
 def view_profile(request):
     application_objects = Application.objects.all()
@@ -87,8 +92,14 @@ def create_application(request):
         checklist = None
         if document_type in ['Visa', 'Work Permit']:
             checklist = Checklist.objects.filter(documentType=document_type).first()
+            print(f"Assigned checklist for {document_type}: {checklist}")
         elif document_type == 'Passport':
             checklist = Checklist.objects.filter(documentType='Passport', country=nationality).first()
+            print(f"Assigned passport checklist for {nationality}: {checklist}")
+
+        # Log error if checklist is not found
+        if checklist is None:
+            print(f"No checklist found for document type: {document_type}, nationality: {nationality}")
 
 
         # Your logic for successful creation goes here
@@ -140,7 +151,7 @@ def create_another(request):
         if expiration_date:
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
 
-        name_pattern = r"^[a-zA-Z\p{L}\s\.\-\']+$"
+        name_pattern = r"^[a-zA-Z\\p{L}\s\.\-\']+$"
 
         error_messages = []
 
@@ -159,10 +170,17 @@ def create_another(request):
             return redirect('create_application')
         
         checklist = None
-        if document_type in ['Visa', 'Work Permit']:
+        if document_type in ['Work Permit', 'Visa']:
             checklist = Checklist.objects.filter(documentType=document_type).first()
+            print(f"Assigned checklist for {document_type}: {checklist}")
         elif document_type == 'Passport':
             checklist = Checklist.objects.filter(documentType='Passport', country=nationality).first()
+            print(f"Assigned passport checklist for {nationality}: {checklist}")
+
+        # Log error if checklist is not found
+        if checklist is None:
+            print(f"No checklist found for document type: {document_type}, nationality: {nationality}")
+
 
         # Your logic for successful creation goes here
         messages.success(request, 'Application successfully created. The application has been added into the system.')
@@ -184,6 +202,15 @@ def create_another(request):
 
         new_application.save()
         return redirect('create_application')
+    
+    context = {
+        'status_choices': Application.statuses,
+        'conditon_choices': Application.conditions,
+        'document_type_choices': Application.document_types,
+        'application_type_choices': Application.application_types
+    }
+    
+    return render(request, 'create_application.html', context)
     
 
 @csrf_protect
@@ -586,29 +613,35 @@ def email(request):
         Email.send()
 
 def filter(request, value):
-    application_list = None
     if value == '0':
-        return redirect('view_dashboard')
+        application_list = Application.objects.all().order_by('-priority', 'deadline')
     elif value == '1':
         application_list = Application.objects.filter(status='In Progress').order_by('-priority', 'deadline')
     elif value == '2':
         application_list = Application.objects.filter(status='Lodged').order_by('-priority', 'deadline')
+    else:
+        return redirect('view_dashboard')  # Default case, if an unsupported filter value is passed
 
-    if application_list is not None:
-        country_name_map = fetch_country_name_mapping()
-        for application in application_list:
-            application.country_name = country_name_map.get(application.nationality, application.nationality)
+    country_name_map = fetch_country_name_mapping()
+    for application in application_list:
+        application.country_name = country_name_map.get(application.nationality, application.nationality)
 
-        paginator = Paginator(application_list, 10)
-        page_number = request.GET.get('page')
-        applications = paginator.get_page(page_number)
+    paginator = Paginator(application_list, 10)
+    page_number = request.GET.get('page')
+    applications = paginator.get_page(page_number)
 
-        return render(request, 'dashboard.html', {
-            'applications': applications,
-            'selected_filter': value
-        })
+    # Calculate counts for all statuses
+    total_all = Application.objects.count()
+    total_in_progress = Application.objects.filter(status='In Progress').count()
+    total_lodged = Application.objects.filter(status='Lodged').count()
 
-    return redirect('view_dashboard')
+    return render(request, 'dashboard.html', {
+        'applications': applications,
+        'selected_filter': value,
+        'total_applications': total_all,
+        'in_progress_count': total_in_progress,
+        'lodged_count': total_lodged
+    })
 
 from django.db.models import Q
 
