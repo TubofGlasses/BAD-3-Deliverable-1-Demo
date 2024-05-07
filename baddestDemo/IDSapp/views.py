@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Application, ApplicationArchive, DeletedApplication, Account, Checklist, ChecklistItem
 from django.core.paginator import Paginator
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 import json
@@ -66,10 +66,17 @@ def create_application(request):
 
         expiration_date = None
         if application_type == 'Renewal':
-            expiration_date = request.POST.get('expirationDate')
-            
-        if expiration_date:
-            expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
+            expiration_date_str = request.POST.get('expirationDate')
+            try:
+                expiration_date = datetime.strptime(expiration_date_str, '%Y-%m-%d').date()
+                today = datetime.today().date()
+                next_week = today + timedelta(weeks=1)
+                
+                if expiration_date <= today or expiration_date < next_week:
+                    raise ValueError("Expiration date must be at least one week from today.")
+            except (ValueError, TypeError):
+                messages.error(request, 'Invalid expiration date. Please select a valid date.')
+                return redirect('create_application')
 
         name_pattern = r"^[a-zA-Z\\p{L}\s\.\-\']+$"
 
