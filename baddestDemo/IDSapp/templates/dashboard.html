@@ -114,11 +114,10 @@
             .filter-in-progress .filter-count { background: #FDDD1B; color: white; }
             .filter-lodged .filter-count { background: #FF8640; color: white; }
         
-            /* Styles for selected filter */
-            .filter-btn.selected {
-                background: #FDDD1B; /* Yellow background for the selected filter */
-                color: white; /* White text for better contrast */
-            }
+            /* Styles for selected filter with different colors */
+            .filter-all.selected { background: #8D8AFF; color: white; }
+            .filter-in-progress.selected { background: #FEEE8D; color: black; }
+            .filter-lodged.selected { background: #ffa570; color: white; }
         </style>
 
         <!--this is for the search bar-->
@@ -159,9 +158,9 @@
         <div class="row mt-4" style="margin-left: 20px; margin-right: 20px;">
             <!-- Left buttons -->
             <div class="col-6 d-flex justify-content-start">
-                <a href="#" class="btn d-flex align-items-center justify-content-center me-2" style="border-radius: 15px; background: #8D8AFF; color: #ffffff; box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.20);">
+                <a href="#" class="filter-btn filter-all">
                     <span style="margin-right: 5px;">All</span>
-                    <p style="margin: 0; border-radius: 10px; background: #2D2A89; font-size: 12px; padding: 2px 5px;">0</p>
+                    <p class="filter-count">0</p>
                 </a>
                
                 <a href="#" class="filter-btn filter-in-progress">
