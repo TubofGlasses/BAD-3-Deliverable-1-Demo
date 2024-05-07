@@ -515,7 +515,7 @@ def logout_view(request):
 
 def view_checklist(request):
     checklist_list = Checklist.objects.all()
-    paginator = Paginator(checklist_list, 7)  # Show 10 checklists per page
+    paginator = Paginator(checklist_list, 7)  # Show 7 checklists per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -545,6 +545,20 @@ def update_checklist(request, checklist_id):
         item_values = request.POST.getlist('items[]')
         items_to_delete = request.POST.getlist('delete_items[]')
 
+        # Check for unique checklist name (excluding "Untitled Checklist")
+        if checklist_name and checklist_name != "Untitled Checklist":
+            existing_checklist_name = Checklist.objects.filter(name=checklist_name).exclude(id=checklist_id).first()
+            if existing_checklist_name:
+                messages.error(request, 'Checklist already exists.')
+                return redirect('view_checklist')
+
+        # Check for duplicate doc type and country combination
+        if docu_type and country:
+            existing_checklist_combination = Checklist.objects.filter(documentType=docu_type, country=country).exclude(id=checklist_id).first()
+            if existing_checklist_combination:
+                messages.error(request, 'Checklist already exists.')
+                return redirect('view_checklist')
+
         print("Checklist Name:", checklist_name)
         print("Document Type:", docu_type)
         print("Country:", country)
@@ -552,15 +566,29 @@ def update_checklist(request, checklist_id):
         print("Items to Delete:", items_to_delete)
         print("New Items:", new_items)
 
+        existing_items = [item.item for item in checklist.items.exclude(id__in=items_to_delete)]
+        duplicate_found = False
+
+        for new_item_name in new_items:
+            if new_item_name.strip() and new_item_name in existing_items:
+                messages.error(request, f'Item already exists.')
+                duplicate_found = True
+            elif new_item_name.strip():
+                ChecklistItem.objects.create(checklist=checklist, item=new_item_name)
+                existing_items.append(new_item_name)
+
+        if duplicate_found:
+            return redirect('view_checklist')
+
         messages.success(request, 'Checklist updated successfully!')
 
         # Update checklist name, doc type, and country
         if checklist_name:
             checklist.name = checklist_name
         if docu_type:
-            checklist.documentType = docu_type  # Assuming Checklist model has a `document_type` field
+            checklist.documentType = docu_type 
         if country:
-            checklist.country = country  # Assuming Checklist model has a `country` field
+            checklist.country = country 
         checklist.save()
 
         # Delete items by their database IDs
@@ -583,7 +611,7 @@ def update_checklist(request, checklist_id):
 
         return redirect('view_checklist')
 
-    return render(request, 'update_checklist.html', {'checklist': checklist})
+    return render(request, 'view_checklist.html', {'checklist': checklist})
 
 def delete_checklist(request, checklist_id):
     checklist = get_object_or_404(Checklist, id=checklist_id)
