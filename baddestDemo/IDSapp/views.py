@@ -596,16 +596,32 @@ def filter(request, value):
 
     if application_list is not None:
         country_name_map = fetch_country_name_mapping()
+        
+    # Map country code to country name
+    for application in application_list:
+        application.country_name = country_name_map.get(application.nationality, application.nationality)
+    
+    paginator = Paginator(application_list, 10)  # Show 10 applications per page
+    page_number = request.GET.get('page')
+    applications = paginator.get_page(page_number)
+    
+    return render(request, 'dashboard.html', {'applications': applications})    
+
+from django.db.models import Q
+
+def search(request):
+    if request.method == 'POST':
+        search = request.POST.get('searchInput')
+        application_list = Application.objects.filter(Q(firstName__contains = search) | Q(lastName__contains = search)).order_by('-priority', 'deadline' )
+        country_name_map = fetch_country_name_mapping()
+
+        # Map country code to country name
         for application in application_list:
             application.country_name = country_name_map.get(application.nationality, application.nationality)
-
-        paginator = Paginator(application_list, 10)
+        
+        paginator = Paginator(application_list, 10)  # Show 10 applications per page
         page_number = request.GET.get('page')
         applications = paginator.get_page(page_number)
-
-        return render(request, 'dashboard.html', {
-            'applications': applications,
-            'selected_filter': value
-        })
-
+        
+        return render(request, 'dashboard.html', {'applications': applications})  
     return redirect('view_dashboard')
