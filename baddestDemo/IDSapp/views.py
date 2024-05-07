@@ -70,7 +70,7 @@ def view_dashboard(request):
                 archived_app.save()
                 application.delete()
                 
-            # Add blank statements based on the deadline conditions
+            # EMAILS HERE?
             elif days_until_deadline < 7:
                 print("Urgent action required")
             elif days_until_deadline < 30:
