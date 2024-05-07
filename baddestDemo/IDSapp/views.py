@@ -77,6 +77,13 @@ def create_application(request):
             for error in error_messages:
                 messages.error(request, error)
             return redirect('create_application')
+        
+        checklist = None
+        if document_type in ['Visa', 'Work Permit']:
+            checklist = Checklist.objects.filter(documentType=document_type).first()
+        elif document_type == 'Passport':
+            checklist = Checklist.objects.filter(documentType='Passport', country=nationality).first()
+
 
         # Your logic for successful creation goes here
         messages.success(request, 'Application successfully created. The application has been added into the system.')
@@ -93,6 +100,7 @@ def create_application(request):
             status = status,
             condition = 'Active',
             expirationDate = expiration_date,  
+            checklist = checklist,
         )
 
         new_application.save()
@@ -143,6 +151,12 @@ def create_another(request):
             for error in error_messages:
                 messages.error(request, error)
             return redirect('create_application')
+        
+        checklist = None
+        if document_type in ['Visa', 'Work Permit']:
+            checklist = Checklist.objects.filter(documentType=document_type).first()
+        elif document_type == 'Passport':
+            checklist = Checklist.objects.filter(documentType='Passport', country=nationality).first()
 
         # Your logic for successful creation goes here
         messages.success(request, 'Application successfully created. The application has been added into the system.')
@@ -159,6 +173,7 @@ def create_another(request):
             status = status,
             condition = 'Active',
             expirationDate = expiration_date,  
+            checklist = checklist,
         )
 
         new_application.save()
@@ -205,10 +220,11 @@ def delete_selected(request):
     return JsonResponse({'status': 'success'}, status=200)
         
 
-def view_application(request, pk): 
+def view_application(request, pk):
     a = get_object_or_404(Application, pk=pk)
     checklist = Checklist.objects.filter(documentType=a.documentType, country=a.nationality).first()
     checklists = Checklist.objects.all()
+    
     if checklist:
         checklist_items = ChecklistItem.objects.filter(checklist=checklist)
     else:
@@ -220,12 +236,23 @@ def view_application(request, pk):
 
     if request.method == 'POST':
         status = request.POST.get('status')
+        if not status:  # Ensure status is not empty
+            status = 'In Progress'  # Assign a default value
+        
         a.status = status
+        
         additionalinfo = request.POST.get('additional info')
-        checklist_id = request.POST.get('checklist')
-        a.checklist_id = checklist_id
         a.comment = additionalinfo
-        a.save()
+
+        checklist_id = request.POST.get('checklist')
+        if checklist_id:
+            a.checklist_id = checklist_id
+
+        try:
+            a.save()
+        except IntegrityError as e:
+            messages.error(request, f"Error updating application: {str(e)}")
+            return redirect('view_application', pk=a.pk)
 
         if status in ['Approved', 'Rejected', 'Expired']:
             archived_app = ApplicationArchive(
@@ -238,7 +265,7 @@ def view_application(request, pk):
                 documentType=a.documentType,
                 businessUnit=a.businessUnit,
                 status=a.status,
-                condition='Archived',  
+                condition='Archived',
                 comment=a.comment,
                 expirationDate=a.expirationDate,
                 deadline=a.deadline,
