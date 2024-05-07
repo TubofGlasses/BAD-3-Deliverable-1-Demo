@@ -75,10 +75,6 @@
                 <!-- column 2 -->
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="PassNo">Passport No.<span class="required-asterisk">*</span></label>
-                        <input type="text" id="PassNo" name="PassNo" class="form-control">
-                    </div>
-                    <div class="form-group">
                         <label for="AppType">Application Type<span class="required-asterisk">*</span></label>
                         <select class="form-control form-select" id="AppType" name="AppType" placeholder="Choose:" style="border-radius: 10px; background-color: #fff;">
                             {% for value, display_text in application_type_choices %}
@@ -96,6 +92,10 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="PassNo">Passport No.<span class="required-asterisk">*</span></label>
+                        <input type="text" id="PassNo" name="PassNo" class="form-control">
+                    </div>
+                    <div class="form-group">
                         <label for="expirationDate">Expiration Date<span class="required-asterisk">*</span></label>
                         <input type="date" id="expirationDate" name="expirationDate" class="form-control" style="border-radius: 10px; background-color: #fff; cursor: pointer;">
                     </div>
@@ -110,6 +110,10 @@
 </div>
 
 <style>
+    .form-control:focus {
+        box-shadow: none; /* Remove the blue shadow */
+    }
+
     .highlight-error::placeholder {
         color: red;
     }
@@ -128,7 +132,7 @@
     }
 
     .highlight-error {
-        border: 1px solid var(--bs-danger-border-subtle) !important;
+        outline: 3px solid var(--bs-danger-border-subtle);
     }
 
     .required-asterisk {
@@ -148,19 +152,79 @@
         card.style.minHeight = newHeight + 'px';
     }
 
+    // Function to enable or disable the expiration date and passport fields
+    function toggleFields() {
+        var appType = document.getElementById('AppType').value;
+        var docType = document.getElementById('docuType').value;
+        const isApplicationType = appType === 'Application';
+        const isPassportType = docType === 'Passport';
+
+        var expirationDate = document.getElementById('expirationDate');
+        var passNo = document.getElementById('PassNo');
+
+        // Disable fields if conditions are met
+        if (isApplicationType && isPassportType) {
+            expirationDate.disabled = true;
+            passNo.disabled = true;
+            expirationDate.style.backgroundColor = '#e9ecef'; // Grayed out color
+            passNo.style.backgroundColor = '#e9ecef';
+            passNo.value = 'N/A';
+        } else {
+            expirationDate.disabled = false;
+            passNo.disabled = false;
+            expirationDate.style.backgroundColor = '#fff';
+            passNo.style.backgroundColor = '#fff';
+            passNo.value = '';
+        }
+        if (isApplicationType) {
+            expirationDate.disabled = true;
+            expirationDate.style.backgroundColor = '#e9ecef';
+        } else {
+            expirationDate.disabled = false;
+            expirationDate.style.backgroundColor = '#fff';
+        }
+    }
+
+    // Remove highlight-error class if the input is valid
+    function removeHighlightOnValidInput(inputElement) {
+        var asteriskElement = inputElement.previousElementSibling.querySelector('.required-asterisk');
+        if (inputElement.value.trim() !== '' && inputElement.value !== 'Choose...') {
+            inputElement.classList.remove('highlight-error');
+            asteriskElement.style.display = 'none';
+        }
+    }
+
+    // Event listeners for application type and document type changes
+    document.getElementById('AppType').addEventListener('change', toggleFields);
+    document.getElementById('docuType').addEventListener('change', toggleFields);
+
+    // Attach event listeners to remove error highlight on input or change
+    var inputFields = ['firstName', 'lastName', 'nationality', 'position', 'PassNo', 'docuType', 'businessUnit', 'expirationDate'];
+    inputFields.forEach(function (fieldId) {
+        var inputElement = document.getElementById(fieldId);
+        if (inputElement.tagName === 'SELECT') {
+            inputElement.addEventListener('change', function () {
+                removeHighlightOnValidInput(inputElement);
+            });
+        } else {
+            inputElement.addEventListener('input', function () {
+                removeHighlightOnValidInput(inputElement);
+            });
+        }
+    });
+
     // Event listener for form submission
-    document.getElementById('applicationForm').addEventListener('submit', function(event) {
-        var requiredFields = ['firstName', 'lastName', 'nationality', 'position', 'PassNo', 'docuType', 'businessUnit', 'expirationDate'];
+    document.getElementById('applicationForm').addEventListener('submit', function (event) {
         var isFormValid = true;
-    
-        requiredFields.forEach(function(fieldId) {
+
+        inputFields.forEach(function (fieldId) {
             var inputElement = document.getElementById(fieldId);
             var asteriskElement = inputElement.previousElementSibling.querySelector('.required-asterisk');
-    
+
             var isInvalid = inputElement.value.trim() === '' || inputElement.value === 'Choose...';
             var isExpirationDateField = fieldId === 'expirationDate';
             var isNotRenewal = document.getElementById('AppType').value !== 'Renewal';
-    
+
             if (isInvalid && !(isExpirationDateField && isNotRenewal)) {
                 inputElement.classList.add('highlight-error');
                 asteriskElement.style.display = 'inline';
@@ -170,7 +234,7 @@
                 asteriskElement.style.display = 'none';
             }
         });
-    
+
         if (!isFormValid) {
             event.preventDefault();
         }
@@ -178,7 +242,7 @@
 
     // Call adjustCardHeight on window load and resize
     window.onload = adjustCardHeight;
-    window.onresize = adjustCardHeight; 
+    window.onresize = adjustCardHeight;
 
     async function fetchNationalities() {
         const nationalitySelect = document.getElementById('nationality');
@@ -197,7 +261,7 @@
             nationalitySelect.innerHTML = '<option value="">Error loading nationalities</option>';
         }
     }
-    
+
     // Fetch nationalities when the page loads
     document.addEventListener('DOMContentLoaded', fetchNationalities);
 
@@ -205,16 +269,48 @@
         const form = document.getElementById('applicationForm');
         const createAnotherButton = document.getElementById('createAnotherButton');
         const confirmButton = document.getElementById('confirmButton');
-    
+
+        function highlightErrors() {
+            var isFormValid = true;
+
+            inputFields.forEach(function (fieldId) {
+                var inputElement = document.getElementById(fieldId);
+                var asteriskElement = inputElement.previousElementSibling.querySelector('.required-asterisk');
+
+                var isInvalid = inputElement.value.trim() === '' || inputElement.value === 'Choose...';
+                var isExpirationDateField = fieldId === 'expirationDate';
+                var isNotRenewal = document.getElementById('AppType').value !== 'Renewal';
+
+                if (isInvalid && !(isExpirationDateField && isNotRenewal)) {
+                    inputElement.classList.add('highlight-error');
+                    asteriskElement.style.display = 'inline';
+                    isFormValid = false;
+                } else {
+                    inputElement.classList.remove('highlight-error');
+                    asteriskElement.style.display = 'none';
+                }
+            });
+
+            return isFormValid;
+        }
+
+        function submitForm(actionUrl) {
+            if (highlightErrors()) {
+                form.action = actionUrl;
+                form.submit();
+            }
+        }
+
         createAnotherButton.addEventListener('click', function () {
-            form.action = "{% url 'create_another' %}";
-            form.submit();
+            submitForm("{% url 'create_another' %}");
         });
-    
+
         confirmButton.addEventListener('click', function () {
-            form.action = "{% url 'create_application' %}";
-            form.submit();
+            submitForm("{% url 'create_application' %}");
         });
+
+        // Initial toggle state based on current values
+        toggleFields();
     });
 </script>
 
