@@ -19,6 +19,6 @@ urlpatterns = [
     path('create_checklist', views.create_checklist, name='create_checklist'),
     path('update_checklist/<int:checklist_id>/', views.update_checklist, name='update_checklist'),
     path('delete/<int:checklist_id>/', views.delete_checklist, name='delete_checklist'),
-    path('filter/<value>', views.filter, name = 'filter'),
+    path('dashboard/<value>', views.filter, name = 'filter'),
     path('search', views.search, name ='search')
 ]
