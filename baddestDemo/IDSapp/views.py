@@ -168,21 +168,6 @@ def create_application(request):
 
         new_application.save()
 
-        if new_application.getPriority() == 3:
-            subj = render_to_string('email-subject.html', {'app': new_application})
-            cont = render_to_string('email-content.html', {'app': new_application})
-            acc = Account.objects.all().values('email')
-            useremails = list(acc)
-
-            Email = EmailMessage(
-                subj,
-                cont,
-                settings.EMAIL_HOST_USER,
-                useremails,
-            )
-
-            Email.send()
-
         return redirect('view_dashboard')
     
     context = {
@@ -270,21 +255,6 @@ def create_another(request):
         )
 
         new_application.save()
-
-        if new_application.getPriority() == 3:
-            subj = render_to_string('email-subject.html', {'app': new_application})
-            cont = render_to_string('email-content.html', {'app': new_application})
-            acc = Account.objects.all().values('email')
-            useremails = list(acc)
-
-            Email = EmailMessage(
-                subj,
-                cont,
-                settings.EMAIL_HOST_USER,
-                useremails,
-            )
-
-            Email.send()
 
         return redirect('create_application')
     
@@ -692,11 +662,6 @@ def update_checklist(request, checklist_id):
                     item.item = item_name
                     item.save()
 
-        # Add new items
-        for new_item_name in new_items:
-            if new_item_name.strip():
-                ChecklistItem.objects.create(checklist=checklist, item=new_item_name)
-
         return redirect('view_checklist')
 
     return render(request, 'view_checklist.html', {'checklist': checklist})
@@ -775,5 +740,14 @@ def search(request):
         page_number = request.GET.get('page')
         applications = paginator.get_page(page_number)
         
-        return render(request, 'dashboard.html', {'applications': applications})  
+        total_all = Application.objects.count()
+        total_in_progress = Application.objects.filter(status='In Progress').count()
+        total_lodged = Application.objects.filter(status='Lodged').count()
+
+        return render(request, 'dashboard.html', {
+            'applications': applications,
+            'total_applications': total_all,
+            'in_progress_count': total_in_progress,
+            'lodged_count': total_lodged
+        })
     return redirect('view_dashboard')
